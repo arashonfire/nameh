@@ -44,7 +44,7 @@ impl Browser {
             .entries
             .iter()
             .filter(|entry| {
-                entry.directory || show_all || mdview::navigation::is_markdown(&entry.path)
+                entry.directory || show_all || nameh::navigation::is_markdown(&entry.path)
             })
             .cloned()
             .collect();

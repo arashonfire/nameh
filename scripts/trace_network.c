@@ -1,8 +1,8 @@
 /* Linux x86-64 release-check helper: trace a command and every descendant.
  * Reject Internet socket creation/activation and io_uring (uninspected here).
  * Unix-domain desktop IPC is allowed. Requires ptrace access to own children.
- * Build: cc -O2 -Wall -Wextra -Werror scripts/trace_network.c -o /tmp/mdview-trace
- * Run: /tmp/mdview-trace /tmp/network.log target/release/mdview FILE
+ * Build: cc -O2 -Wall -Wextra -Werror scripts/trace_network.c -o /tmp/nameh-trace
+ * Run: /tmp/nameh-trace /tmp/network.log target/release/nameh FILE
  */
 #define _GNU_SOURCE
 #include <errno.h>

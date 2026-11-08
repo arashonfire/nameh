@@ -1,7 +1,7 @@
 //! Application-wide reading preferences and native appearance selection.
 use crate::window::DocumentWindow;
 use gtk::{gio, glib, prelude::*};
-use mdview::preferences::Preferences;
+use nameh::preferences::Preferences;
 use std::{
     cell::RefCell,
     path::PathBuf,

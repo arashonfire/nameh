@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Measure fresh prototype processes on a Hyprland reference desktop.
 
-Requires a release build, hyprctl, gdbus, /proc, and no existing mdview process.
+Requires a release build, hyprctl, gdbus, /proc, and no existing nameh process.
 Reports mapped-window latency with warm filesystem caches, not cold readable time.
 """
 
@@ -20,14 +20,14 @@ def measure():
         with tempfile.TemporaryFile() as log:
             start = time.perf_counter()
             app = subprocess.Popen(
-                [str(root / "target/release/mdview"), "--prototype"],
+                [str(root / "target/release/nameh"), "--prototype"],
                 stdout=log,
                 stderr=log,
             )
             try:
                 while time.perf_counter() - start < 10:
                     if app.poll() is not None:
-                        raise RuntimeError("mdview exited; close any existing instance first")
+                        raise RuntimeError("nameh exited; close any existing instance first")
                     clients = json.loads(
                         subprocess.check_output(["hyprctl", "clients", "-j"], timeout=2)
                     )
@@ -60,7 +60,7 @@ def measure():
                     check=True, capture_output=True, timeout=3,
                 )
                 if app.wait(timeout=5) != 0:
-                    raise RuntimeError("mdview did not exit cleanly")
+                    raise RuntimeError("nameh did not exit cleanly")
             finally:
                 if app.poll() is None:
                     app.terminate()

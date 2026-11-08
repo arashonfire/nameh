@@ -9,7 +9,7 @@ const APPLICATION_ID: &str = "io.github.arash.mdview";
 type Windows = Rc<RefCell<Vec<Rc<DocumentWindow>>>>;
 
 pub fn run() -> glib::ExitCode {
-    glib::set_application_name("mdview");
+    glib::set_application_name("Nameh");
     let application = gtk::Application::builder()
         .application_id(APPLICATION_ID)
         .flags(gio::ApplicationFlags::HANDLES_OPEN)
@@ -38,7 +38,7 @@ fn configure(application: &gtk::Application, preview: Rc<Cell<bool>>) -> Windows
     let settings = crate::reading::ReadingSettings::new(if cfg!(test) {
         None
     } else {
-        Some(mdview::preferences::Preferences::path())
+        Some(nameh::preferences::Preferences::path())
     });
     settings.install(application);
     let windows: Windows = Rc::new(RefCell::new(Vec::new()));

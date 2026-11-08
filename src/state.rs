@@ -1,7 +1,7 @@
 //! State owned by one document window.
 use crate::document_view::DocumentView;
 use gtk::gio;
-use mdview::document::LinkTarget;
+use nameh::document::LinkTarget;
 use std::path::PathBuf;
 
 #[derive(Clone)]

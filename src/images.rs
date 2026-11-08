@@ -1,6 +1,6 @@
 //! Bounded local raster loading. No URI APIs or extensible/vector decoders.
 use gtk::{gdk, gio, glib, prelude::*};
-use mdview::document::LocalTarget;
+use nameh::document::LocalTarget;
 use std::{
     io::Read,
     os::unix::fs::OpenOptionsExt,
@@ -160,7 +160,7 @@ fn validate_dimensions(width: u32, height: u32) -> Result<(), String> {
     }
 }
 
-pub use mdview::navigation::decode_component;
+pub use nameh::navigation::decode_component;
 
 pub fn local_path(base: &Path, source: &LocalTarget) -> Option<PathBuf> {
     // The decoded spelling remains a filesystem path, even if it resembles a URI.

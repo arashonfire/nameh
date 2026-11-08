@@ -1,4 +1,4 @@
-use mdview::document::{
+use nameh::document::{
     Alignment, Document, ExternalScheme, LinkTarget, Node, NodeKind, classify_link, parse,
 };
 

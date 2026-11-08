@@ -2,14 +2,14 @@
 
 Nameh is a lightweight native Markdown viewer for Linux, built with Rust, GTK4, and pulldown-cmark.
 
-The app was developed under the working name `mdview`. The executable/Cargo package
-is currently still `mdview`, the application ID is `io.github.arash.mdview`, and
-preferences and installed asset paths still use that identifier. Commands below
-match the current implementation; the Nameh name is now used in the documentation.
+The executable and Cargo package are named `nameh`; the desktop launcher and
+window titles use **Nameh**. The app was developed under the working name `mdview`.
+Its stable application ID (`io.github.arash.mdview`), desktop/icon/MIME asset IDs
+and existing preference path (`mdview/preferences.ini`) are retained for continuity.
 
 ## Current status
 
-Steps 1–9 are complete, including accessibility, desktop integration, automatic reload, cooperative large-document loading/search, release validation and native installation tooling. The unchanged 180 MB idle RSS budget passes on the reference GNU/Linux desktop. Open files through the picker, drag and drop, or `mdview PATH`. See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the latest session record and [release validation](docs/RELEASE_VALIDATION.md) for results and unperformed checks. The user selected the [MIT license](LICENSE) and accepted the measured fresh-process startup results with OS caches warm/uncontrolled. No release has been published or persistently installed by the checks.
+Steps 1–9 are complete, including accessibility, desktop integration, automatic reload, cooperative large-document loading/search, release validation and native installation tooling. The unchanged 180 MB idle RSS budget passes on the reference GNU/Linux desktop. Open files through the picker, drag and drop, or `nameh PATH`. See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the latest session record and [release validation](docs/RELEASE_VALIDATION.md) for results and unperformed checks. The user selected the [MIT license](LICENSE) and accepted the measured fresh-process startup results with OS caches warm/uncontrolled. No release has been published or persistently installed by the checks.
 
 The project now has a Git repository, initialized by the user with commit
 `5a3625d` (`first commit`). Earlier session records describe the environment before
@@ -67,10 +67,10 @@ cargo fetch --locked
 make build
 make install PREFIX="$HOME/.local"
 export PATH="$HOME/.local/bin:$PATH"
-mdview "fixtures/notes/Unicode café.md"
+nameh "fixtures/notes/Unicode café.md"
 ```
 
-Keep `~/.local/bin` on the desktop session's PATH for the launcher (`Exec=mdview %F`).
+Keep `~/.local/bin` on the desktop session's PATH for the launcher (`Exec=nameh %F`).
 The usual desktop data directory is `~/.local/share`; a custom prefix also needs
 `PREFIX/share` in `XDG_DATA_DIRS`. Nonstandard `XDG_DATA_HOME` layouts need matching
 desktop configuration. The binary links to the system GTK/GLib libraries; install
@@ -79,9 +79,8 @@ portable bundle or proof of compatibility with every GTK 4.10 distribution.
 
 Installed files are the binary, desktop entry, scalable icon, MIME declaration,
 README, [user guide](docs/USER_GUIDE.md), and MIT license. Cache tools run when
-available; no default application is selected. The current desktop entry appears
-as **mdview**; choose it through your file
-manager's **Open With** controls if desired.
+available; no default application is selected. Choose **Nameh** through your
+file manager's **Open With** controls if desired.
 
 Remove the installation with the same prefix:
 
@@ -97,8 +96,8 @@ from the path documented under Reading controls.
 Stage a native filesystem layout without installing to system or user directories:
 
 ```sh
-make install DESTDIR=/tmp/mdview-stage PREFIX=/usr
-make uninstall DESTDIR=/tmp/mdview-stage PREFIX=/usr
+make install DESTDIR=/tmp/nameh-stage PREFIX=/usr
+make uninstall DESTDIR=/tmp/nameh-stage PREFIX=/usr
 ```
 
 `DESTDIR` suppresses cache updates. A package manager should refresh caches after
@@ -148,7 +147,7 @@ Preferences live in `$XDG_CONFIG_HOME/mdview/preferences.ini`, or `~/.config/mdv
 
 ## Desktop integration and accessibility
 
-The desktop entry, scalable icon and Markdown MIME declarations live under `data/`. The desktop file uses `mdview %F`; the executable must be on the launcher's PATH. GApplication handles activation, single-instance forwarding and multiple local file arguments. `DBusActivatable=false` deliberately uses executable activation; there is no D-Bus service file. The desktop entry's X11 class is `mdview`; Wayland uses the application ID.
+The desktop entry, scalable icon and Markdown MIME declarations live under `data/`. The desktop file uses `nameh %F`; the executable must be on the launcher's PATH. GApplication handles activation, single-instance forwarding and multiple local file arguments. `DBusActivatable=false` deliberately uses executable activation; there is no D-Bus service file. The desktop entry's X11 class is `nameh`; Wayland uses the application ID.
 
 Test a local installation without touching user directories or MIME defaults:
 
@@ -192,7 +191,7 @@ The application ID is `io.github.arash.mdview`. GTK supplies compatible GLib and
 
 ## Document model
 
-`mdview::document::parse(&str)` returns an owned `Document` containing the original source and a tree of `Node` values. Each node retains a half-open UTF-8 byte range into that source. Block and inline kinds preserve nesting, table alignment, code whitespace, link/image titles, image alt text, and ordered-list starts. Tight list items may contain inline nodes directly; loose items contain paragraphs. Table headers contain cells directly; body rows use `TableRow`. Only tables, task lists, and strikethrough extensions are enabled. Raw HTML events and HTML blocks are discarded; ordinary Markdown text between inline HTML tags is retained. Literal HTML inside code remains code text.
+`nameh::document::parse(&str)` returns an owned `Document` containing the original source and a tree of `Node` values. Each node retains a half-open UTF-8 byte range into that source. Block and inline kinds preserve nesting, table alignment, code whitespace, link/image titles, image alt text, and ordered-list starts. Tight list items may contain inline nodes directly; loose items contain paragraphs. Table headers contain cells directly; body rows use `TableRow`. Only tables, task lists, and strikethrough extensions are enabled. Raw HTML events and HTML blocks are discarded; ordinary Markdown text between inline HTML tags is retained. Literal HTML inside code remains code text.
 
 Heading IDs lowercase Unicode alphanumerics, retain underscores and hyphens, drop punctuation, and turn whitespace into hyphens. Empty names use `section`. Collisions get `-1`, `-2`, etc., checked against every previous ID, including headings with literal numeric suffixes. No Unicode normalization is applied. Heading text includes inline code, link labels, and image alt text.
 

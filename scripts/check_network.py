@@ -3,7 +3,7 @@
 
 Requires cc, Hyprland, gdbus, desktop access and permission to trace own children.
 Allows Unix desktop IPC; rejects other socket families and uninspected io_uring.
-Checks the tracer against AF_UNIX/AF_INET controls before testing mdview. Never
+Checks the tracer against AF_UNIX/AF_INET controls before testing nameh. Never
 activates external links. This does not trace unrelated desktop daemon activity.
 """
 import argparse
@@ -25,11 +25,11 @@ def main():
     args = parser.parse_args()
     if os.uname().machine != "x86_64":
         raise RuntimeError("tracer supports only Linux x86-64")
-    if subprocess.run(["pgrep", "-x", "mdview"], capture_output=True).returncode == 0:
-        raise RuntimeError("close existing mdview instances first")
+    if subprocess.run(["pgrep", "-x", "nameh|mdview"], capture_output=True).returncode == 0:
+        raise RuntimeError("close existing nameh instances first")
     if args.output.exists():
         raise RuntimeError("use a new output path")
-    with tempfile.TemporaryDirectory(prefix="mdview-network-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="nameh-network-") as temporary:
         directory = Path(temporary)
         tracer = directory / "trace"
         subprocess.run(["cc", "-O2", "-Wall", "-Wextra", "-Werror",
@@ -57,7 +57,7 @@ def main():
         for name in ["assets", "notes"]:
             (directory / name).symlink_to(ROOT / "fixtures" / name)
         trace = args.output.with_suffix(".log").resolve()
-        binary = ROOT / "target/release/mdview"
+        binary = ROOT / "target/release/nameh"
         env = dict(os.environ, XDG_CONFIG_HOME=str(config), GDK_BACKEND="wayland")
         with tempfile.TemporaryFile() as log:
             process = subprocess.Popen([str(tracer), str(trace), str(binary), str(document)],
@@ -66,7 +66,7 @@ def main():
                 deadline = time.monotonic() + 25
                 while True:
                     windows = json.loads(subprocess.check_output(["hyprctl", "clients", "-j"], timeout=3))
-                    if any(c["title"] == document.name + " — mdview" for c in windows):
+                    if any(c["title"] == document.name + " — Nameh" for c in windows):
                         break
                     if process.poll() is not None or time.monotonic() > deadline:
                         log.seek(0)
@@ -81,7 +81,7 @@ def main():
                 report = {"release_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
                           "tracer_controls_pass": True, "trace_exit": result,
                           "source_unchanged": unchanged, "trace": str(trace),
-                          "scope": "mdview and traced descendants, Linux x86-64; Unix IPC allowed; no external activation"}
+                          "scope": "nameh and traced descendants, Linux x86-64; Unix IPC allowed; no external activation"}
                 args.output.write_text(json.dumps(report, indent=2) + "\n")
                 print(json.dumps(report), flush=True)
                 if result != 0 or not unchanged:

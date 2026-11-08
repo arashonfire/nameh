@@ -1,5 +1,5 @@
 [package]
-name = "mdview"
+name = "nameh"
 version = "0.1.0"
 edition = "2024"
 description = "A lightweight native Markdown viewer for Linux"

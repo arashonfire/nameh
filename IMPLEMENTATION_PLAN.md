@@ -8,10 +8,11 @@ The user chose **Nameh** as the app's name and initialized Git with commit
 `5a3625d` (`first commit`). Git history is now available; inspect `git status` and
 `git diff` before changing files and preserve unrelated work.
 
-The implementation currently retains the working identifier `mdview` for the
-Cargo package/executable, application ID `io.github.arash.mdview`, window/desktop
-labels, installed asset names and preference paths. This documentation update
-adopts Nameh as the product name; documented commands continue to match the code.
+The Cargo package, library crate and executable are now `nameh`; desktop/window
+labels use **Nameh**. The stable application ID `io.github.arash.mdview`, asset IDs,
+internal CSS/widget identifiers and preference paths retain the existing identifiers.
+Current build, install and usage commands use `nameh`. Earlier implementation and
+measurement records retain the working name `mdview` as historical evidence.
 Earlier session records are historical: their statements about unavailable Git
 history describe those sessions before the user initialized the repository.
 
@@ -29,7 +30,7 @@ If a step cannot be completed, leave it in progress and make the handover point 
 
 - A viewer only. Never modify a document or show editing controls.
 - One document per window, with an explicit action to open another window. Opening a file in an existing window replaces its document.
-- Open through a file picker, drag and drop, or `mdview PATH`. Support paths containing spaces and Unicode.
+- Open through a file picker, drag and drop, or `nameh PATH`. Support paths containing spaces and Unicode.
 - Render headings, paragraphs, emphasis, strikethrough, nested ordered and unordered lists, blockquotes, horizontal rules, inline and fenced code, tables, noninteractive task lists, links, images, and heading anchors.
 - Provide selectable text, copy, document search, zoom, keyboard scrolling, and automatic reload after external changes.
 - Resolve relative paths from the document directory. Open Markdown links internally and web links or other files through the default application.
@@ -393,7 +394,7 @@ At the end of each implementation session, fill in this template and include it 
 ```text
 Continue Nameh, the lightweight Linux Markdown viewer, in /home/arash/Documents/markdown.
 
-Git is initialized. Inspect status/diff and preserve unrelated work. The current executable is still mdview; consult the project-name notes before changing identifiers.
+Git is initialized. Inspect status/diff and preserve unrelated work. The current executable is nameh; consult the project-name notes for retained stable identifiers.
 
 Read IMPLEMENTATION_PLAN.md, its latest session record, and any applicable repository instructions first. Inspect the existing code and working tree; preserve unrelated user changes.
 

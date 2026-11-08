@@ -17,8 +17,8 @@ pub fn launch(parent: &gtk::ApplicationWindow, target: LaunchTarget, done: Compl
     match target {
         LaunchTarget::Uri(uri) => {
             if !matches!(
-                mdview::document::classify_link(&uri),
-                Some(mdview::document::LinkTarget::External { .. })
+                nameh::document::classify_link(&uri),
+                Some(nameh::document::LinkTarget::External { .. })
             ) {
                 done(Err("Unsupported URI scheme".into()));
                 return;

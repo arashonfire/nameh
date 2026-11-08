@@ -1,7 +1,7 @@
 //! Model-driven GTK rendering; target dispatch is supplied by the caller.
 use crate::{document_view::DocumentView, images};
 use gtk::{glib, prelude::*};
-use mdview::document::{Alignment, Document, LinkTarget, Node, NodeKind};
+use nameh::document::{Alignment, Document, LinkTarget, Node, NodeKind};
 use std::{path::Path, rc::Rc};
 
 type Activate = Rc<dyn Fn(&LinkTarget)>;
@@ -390,7 +390,7 @@ pub fn verify_rendering() {
     let targets = Rc::new(RefCell::new(Vec::new()));
     let saved = targets.clone();
     let view = render(
-        &mdview::document::parse(&markdown),
+        &nameh::document::parse(&markdown),
         &base,
         Rc::new(move |target| saved.borrow_mut().push(target.clone())),
     );

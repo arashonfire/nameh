@@ -26,7 +26,7 @@ def run(*args, env=None):
 
 
 def windows():
-    return [c for c in json.loads(run("hyprctl", "clients", "-j")) if c["class"] in [APP_ID, "mdview"]]
+    return [c for c in json.loads(run("hyprctl", "clients", "-j")) if c["class"] in [APP_ID, "nameh"]]
 
 
 def wait_for(predicate):
@@ -43,18 +43,18 @@ def quit_app(env):
     run("gdbus", "call", "--session", "--dest", APP_ID, "--object-path",
         "/io/github/arash/mdview", "--method", "org.gtk.Actions.Activate", "quit", "[]", "{}", env=env)
     wait_for(lambda: not windows())
-    wait_for(lambda: subprocess.run(["pgrep", "-x", "mdview"], capture_output=True).returncode != 0)
+    wait_for(lambda: subprocess.run(["pgrep", "-x", "nameh"], capture_output=True).returncode != 0)
 
 
 def main():
-    if subprocess.run(["pgrep", "-x", "mdview"], capture_output=True).returncode == 0:
-        raise RuntimeError("close existing mdview processes first")
+    if subprocess.run(["pgrep", "-x", "nameh|mdview"], capture_output=True).returncode == 0:
+        raise RuntimeError("close existing nameh processes first")
     defaults = {mime: run("xdg-mime", "query", "default", mime)
                 for mime in ["text/markdown", "text/x-markdown"]}
-    with tempfile.TemporaryDirectory(prefix="mdview-desktop-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="nameh-desktop-") as temporary:
         prefix = Path(temporary)
         data = prefix / "share"
-        binary = prefix / "bin/mdview"
+        binary = prefix / "bin/nameh"
         config = prefix / "config"
         config.mkdir()
         gtk_config = Path.home() / ".config/gtk-4.0"
@@ -67,10 +67,10 @@ def main():
         installed = [binary, data / f"applications/{APP_ID}.desktop",
                      data / f"icons/hicolor/scalable/apps/{APP_ID}.svg",
                      data / f"mime/packages/{APP_ID}.xml",
-                     data / "doc/mdview/README.md", data / "doc/mdview/USER_GUIDE.md",
-                     data / "licenses/mdview/LICENSE"]
+                     data / "doc/nameh/README.md", data / "doc/nameh/USER_GUIDE.md",
+                     data / "licenses/nameh/LICENSE"]
         assert all(path.is_file() for path in installed)
-        assert binary.read_bytes() == (ROOT / "target/release/mdview").read_bytes()
+        assert binary.read_bytes() == (ROOT / "target/release/nameh").read_bytes()
         desktop = data / f"applications/{APP_ID}.desktop"
         run("desktop-file-validate", str(desktop))
         run("update-mime-database", str(data / "mime"), env=env)
@@ -89,7 +89,7 @@ def main():
                 files = [ROOT / "fixtures/basic.md", ROOT / "fixtures/notes/Unicode café.md"]
                 run("gio", "launch", str(desktop), *(str(f) for f in files), env=env)
                 opened = wait_for(lambda: (w if len(w := windows()) == 2 and
-                    {c["title"] for c in w} == {f.name + " — mdview" for f in files} else None))
+                    {c["title"] for c in w} == {f.name + " — Nameh" for f in files} else None))
                 assert all(bool(c["xwayland"]) == (backend == "x11") for c in opened)
                 print(json.dumps({"backend": backend, "titles": [c["title"] for c in opened],
                                   "launcher_and_file_open": True}), flush=True)

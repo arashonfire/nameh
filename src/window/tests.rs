@@ -581,7 +581,7 @@ pub fn verify_reading(controller: &Rc<DocumentWindow>, application: &gtk::Applic
     assert!(!application.accels_for_action("app.zoom-in").is_empty());
     assert_eq!(fs::read_to_string(path).unwrap(), source);
     let preferences_path = dir.join("preferences.ini");
-    let saved = mdview::preferences::Preferences {
+    let saved = nameh::preferences::Preferences {
         theme: "dark".into(),
         zoom: 140,
         width: 960,

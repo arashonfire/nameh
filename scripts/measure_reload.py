@@ -2,8 +2,8 @@
 """Profile release reload stability and return-from-5-MB RSS on Hyprland.
 
 Requires a desktop/session bus, hyprctl, gdbus, wtype, a release build, and
-no existing mdview instance. Uses disposable source/preferences, default GTK
-renderer and compositor geometry (keep mdview focused throughout). Samples
+no existing nameh instance. Uses disposable source/preferences, default GTK
+renderer and compositor geometry (keep nameh focused throughout). Samples
 RSS every 10 ms, records transient peaks separately from twenty-second reload
 and return-to-small samples plus cache-settled picker samples. Fails if idle RSS reaches
 180 decimal MB after settling. Immediate picker samples remain in the report.
@@ -32,14 +32,14 @@ def clients():
 
 def measure(large_kind="prose", output=None):
     root = Path(__file__).resolve().parent.parent
-    binary = str(root / "target/release/mdview")
-    if subprocess.run(["pgrep", "-x", "mdview"], capture_output=True).returncode == 0:
-        raise RuntimeError("close existing mdview instances before measuring")
+    binary = str(root / "target/release/nameh")
+    if subprocess.run(["pgrep", "-x", "nameh|mdview"], capture_output=True).returncode == 0:
+        raise RuntimeError("close existing nameh instances before measuring")
     with open(binary, "rb") as executable:
         binary_hash = hashlib.file_digest(executable, "sha256").hexdigest()
     if output is not None:
         output.open("x").close()
-    with tempfile.TemporaryDirectory(prefix="mdview-step7-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="nameh-step7-") as temporary:
         directory = Path(temporary)
         config = directory / "config"
         config.mkdir()
@@ -144,7 +144,7 @@ def measure(large_kind="prose", output=None):
             def send_keys(*arguments):
                 active = json.loads(subprocess.check_output(["hyprctl", "activewindow", "-j"], timeout=3))
                 if active.get("pid") != app.pid:
-                    raise RuntimeError("keep mdview focused while measuring keyboard input")
+                    raise RuntimeError("keep nameh focused while measuring keyboard input")
                 keys(*arguments)
 
             def picker_cancel():
@@ -157,7 +157,7 @@ def measure(large_kind="prose", output=None):
             try:
                 time.sleep(1)
                 if app.poll() is not None:
-                    raise RuntimeError("mdview exited; close existing instances first")
+                    raise RuntimeError("nameh exited; close existing instances first")
                 assert any(client["pid"] == app.pid for client in clients())
                 initial_geometry = [c["size"] for c in clients() if c["pid"] == app.pid]
                 report(initial=checkpoint_rss(), initial_geometry=initial_geometry, release_sha256=binary_hash)

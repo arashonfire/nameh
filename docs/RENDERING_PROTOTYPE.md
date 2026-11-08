@@ -2,7 +2,9 @@
 
 Nameh was developed and measured under the working name `mdview`. Historical
 commands, application IDs, screenshots and raw results below retain that name;
-the current executable and paths still use `mdview`. Git is now initialized at
+the current executable is `nameh`. Stable application/asset IDs and preferences
+retain their existing identifiers; old hashes/results do not describe a new
+measurement of the renamed executable. Git is now initialized at
 `5a3625d` (`first commit`), after the implementation and release-validation sessions.
 
 The application retains GTK's default renderer and the approved 180 MB RSS budget. Step 4 replaced direct parsing with the document model, and Step 5 connected file opening and safe navigation, and Step 6 added reading controls/preferences. Step 7 retained-memory acceptance is complete on the reference GNU/Linux desktop; transient peaks are reported explicitly. Earlier measurements below remain historical references.

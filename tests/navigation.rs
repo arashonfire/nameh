@@ -1,4 +1,4 @@
-use mdview::{
+use nameh::{
     document::{ExternalScheme, LinkTarget, LocalTarget, classify_link},
     navigation::{self, Destination},
 };

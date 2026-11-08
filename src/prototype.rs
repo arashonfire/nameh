@@ -20,7 +20,7 @@ pub fn build() -> gtk::ScrolledWindow {
 
 pub fn render(markdown: &str) -> crate::document_view::DocumentView {
     crate::native::render(
-        &mdview::document::parse(markdown),
+        &nameh::document::parse(markdown),
         &Path::new(env!("CARGO_MANIFEST_DIR")).join("fixtures"),
         Rc::new(|_| {}),
     )

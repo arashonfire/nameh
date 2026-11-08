@@ -5,7 +5,7 @@ use crate::{
     state::{AppState, Request},
 };
 use gtk::{gdk, gio, glib, prelude::*};
-use mdview::{
+use nameh::{
     document::LinkTarget,
     navigation::{self, Destination, LoadedDocument},
 };
@@ -51,7 +51,7 @@ impl DocumentWindow {
         let prefs = settings.values.borrow().clone();
         let window = gtk::ApplicationWindow::builder()
             .application(application)
-            .title("mdview")
+            .title("Nameh")
             .default_width(prefs.width)
             .default_height(prefs.height)
             .build();
@@ -493,7 +493,7 @@ impl DocumentWindow {
             .file_name()
             .unwrap_or_default()
             .to_string_lossy();
-        self.window.set_title(Some(&format!("{filename} — mdview")));
+        self.window.set_title(Some(&format!("{filename} — Nameh")));
         self.window
             .set_tooltip_text(Some(&loaded.path.to_string_lossy()));
         {

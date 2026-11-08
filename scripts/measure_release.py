@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Measure fresh release processes on Hyprland with a 100,000-byte document.
 
-Requires Hyprland 0.57 Lua dispatch, grim, gdbus, wtype and no mdview instance. Saves screenshots
+Requires Hyprland 0.57 Lua dispatch, grim, gdbus, wtype and no nameh instance. Saves screenshots
 for human readable-content review. Caches are NOT dropped. Capture completion
 includes two-frame allowance and screenshot overhead; mapping alone is not used
 as readable latency. Recursively sums RSS from descendants of every thread.
@@ -60,8 +60,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    if subprocess.run(["pgrep", "-x", "mdview"], capture_output=True).returncode == 0:
-        raise RuntimeError("close all mdview instances first")
+    if subprocess.run(["pgrep", "-x", "nameh|mdview"], capture_output=True).returncode == 0:
+        raise RuntimeError("close all nameh instances first")
     if os.environ.get("GSK_RENDERER"):
         raise RuntimeError("unset GSK_RENDERER for default-renderer acceptance")
     output = args.output.resolve()
@@ -86,7 +86,7 @@ def main():
 
     server = ThreadingHTTPServer(("127.0.0.1", 0), Sentinel)
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    binary = ROOT / "target/release/mdview"
+    binary = ROOT / "target/release/nameh"
     fixture_hashes = {str(p): hashlib.sha256(p.read_bytes()).hexdigest()
                       for p in (ROOT / "fixtures").rglob("*") if p.is_file()}
     report(release_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),
@@ -98,13 +98,13 @@ def main():
            rust=run("rustc", "--version").decode().strip(),
            display="Hyprland Wayland", network_check="local sentinel only; separate check_network.py traces syscalls")
     original_workspace = json.loads(run("hyprctl", "activeworkspace", "-j"))
-    validation_workspace = "name:mdview-release-" + str(os.getpid())
+    validation_workspace = "name:nameh-release-" + str(os.getpid())
     results = []
     try:
         run("hyprctl", "eval", "hl.dispatch(hl.dsp.focus({workspace=" + json.dumps(validation_workspace) +
             ", on_current_monitor=true}))")
         time.sleep(0.3)
-        with tempfile.TemporaryDirectory(prefix="mdview-release-") as temporary:
+        with tempfile.TemporaryDirectory(prefix="nameh-release-") as temporary:
             directory = Path(temporary)
             source = directory / "100 KB café.md"
             paragraph = "Readable café, Ελληνικά, فارسی and 日本語. A local document for release validation.\n\n"
@@ -137,7 +137,7 @@ def main():
                         deadline = start + 15
                         while True:
                             window = next((c for c in clients() if c["pid"] == app.pid
-                                           and c.get("mapped") and c["title"] == source.name + " — mdview"), None)
+                                           and c.get("mapped") and c["title"] == source.name + " — Nameh"), None)
                             if window:
                                 break
                             if app.poll() is not None or time.monotonic() > deadline:
@@ -148,7 +148,7 @@ def main():
                         time.sleep(0.04)
                         active = json.loads(run("hyprctl", "activewindow", "-j"))
                         if active.get("pid") != app.pid:
-                            raise RuntimeError("mdview lost focus; stopped screen capture")
+                            raise RuntimeError("nameh lost focus; stopped screen capture")
                         x, y = window["at"]
                         width, height = window["size"]
                         screenshot = output.with_name(output.stem + f"-{index + 1}.png")
@@ -165,7 +165,7 @@ def main():
                             def key(*arguments):
                                 active = json.loads(run("hyprctl", "activewindow", "-j"))
                                 if active.get("pid") != app.pid:
-                                    raise RuntimeError("mdview lost focus; stopped keyboard input")
+                                    raise RuntimeError("nameh lost focus; stopped keyboard input")
                                 run("wtype", *arguments)
 
                             stress_start = len(samples)

@@ -1,13 +1,13 @@
 [Desktop Entry]
 Type=Application
-Name=mdview
+Name=Nameh
 GenericName=Markdown Viewer
 Comment=Read local Markdown documents
-Exec=mdview %F
+Exec=nameh %F
 Icon=io.github.arash.mdview
 Terminal=false
 Categories=Office;Viewer;
 MimeType=text/markdown;text/x-markdown;
 StartupNotify=true
-StartupWMClass=mdview
+StartupWMClass=nameh
 DBusActivatable=false

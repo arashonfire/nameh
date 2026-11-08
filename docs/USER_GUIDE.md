@@ -1,10 +1,10 @@
 # Reading with Nameh
 
-Nameh currently runs as `mdview` and appears as **mdview** in the desktop launcher
-and window titles. Its command and preference paths below use that existing name.
+Run Nameh with the `nameh` command or open **Nameh** from the desktop launcher.
+Preferences continue to use the existing `mdview` directory so saved settings are retained.
 
 Open a local Markdown document with **Open** (Ctrl+O), drop one file on a window,
-or run `mdview "path/to/notes.md"`. Each window shows one document. Opening another
+or run `nameh "path/to/notes.md"`. Each window shows one document. Opening another
 file replaces it after loading succeeds. **New Window** (Ctrl+N) opens a separate
 window. Ctrl+W closes a window; Ctrl+Q quits.
 

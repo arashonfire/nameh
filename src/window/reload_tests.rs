@@ -155,7 +155,7 @@ pub fn verify_reload(application: &gtk::Application) {
     fs::create_dir_all(dir.join("sub")).unwrap();
     controller.perform(Request::Follow {
         document_path: path.clone(),
-        target: mdview::document::classify_link("sub/../watched%20caf%C3%A9.md").unwrap(),
+        target: nameh::document::classify_link("sub/../watched%20caf%C3%A9.md").unwrap(),
     });
     wait_for_open(&controller);
     fs::write(&path, "relative parent save").unwrap();

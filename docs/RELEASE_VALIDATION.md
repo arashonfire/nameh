@@ -1,8 +1,10 @@
 # Nameh 0.1.0 release validation
 
 These results were recorded under the working name `mdview`. The app is now named
-Nameh; the measured executable, application ID, paths, screenshots and raw evidence
-retain their existing identifiers. The user has since initialized Git with commit
+Nameh, and the current executable is `nameh`. The old measured executable hashes,
+paths, screenshots and raw evidence retain their historical identifiers; they are
+not fresh measurements of the renamed binary. Stable application/asset IDs and
+preferences retain their existing paths. The user has since initialized Git with commit
 `5a3625d` (`first commit`); earlier validation predates the repository.
 
 Step 9 is complete with the verification limits below. The user explicitly accepted
@@ -23,12 +25,12 @@ cargo check --locked --offline
 cargo clippy --locked --offline --all-targets -- -D warnings
 cargo test --locked --offline -- --nocapture
 cargo build --release --locked --offline
-cargo build --release --locked --offline --target-dir /tmp/mdview-clean-build
+cargo build --release --locked --offline --target-dir /tmp/nameh-clean-build
 python scripts/check_desktop.py
-python scripts/check_network.py --output /tmp/mdview-network.json
-python scripts/measure_release.py --output /tmp/mdview-startup.jsonl
-python scripts/measure_reload.py --output /tmp/mdview-prose.jsonl
-python scripts/measure_reload.py --large-kind code --output /tmp/mdview-code.jsonl
+python scripts/check_network.py --output /tmp/nameh-network.json
+python scripts/measure_release.py --output /tmp/nameh-startup.jsonl
+python scripts/measure_reload.py --output /tmp/nameh-prose.jsonl
+python scripts/measure_reload.py --large-kind code --output /tmp/nameh-code.jsonl
 ```
 
 Use new output paths. Run graphical checks sequentially with no existing Nameh process;

@@ -11,23 +11,23 @@ build:
 	$(CARGO) build --release $(CARGO_FLAGS)
 
 install: build
-	install -Dm755 target/release/mdview "$(STAGED_PREFIX)/bin/mdview"
+	install -Dm755 target/release/nameh "$(STAGED_PREFIX)/bin/nameh"
 	install -Dm644 data/$(APP_ID).desktop "$(STAGED_PREFIX)/share/applications/$(APP_ID).desktop"
 	install -Dm644 data/icons/hicolor/scalable/apps/$(APP_ID).svg "$(STAGED_PREFIX)/share/icons/hicolor/scalable/apps/$(APP_ID).svg"
 	install -Dm644 data/mime/packages/$(APP_ID).xml "$(STAGED_PREFIX)/share/mime/packages/$(APP_ID).xml"
-	install -Dm644 README.md "$(STAGED_PREFIX)/share/doc/mdview/README.md"
-	install -Dm644 docs/USER_GUIDE.md "$(STAGED_PREFIX)/share/doc/mdview/USER_GUIDE.md"
-	install -Dm644 LICENSE "$(STAGED_PREFIX)/share/licenses/mdview/LICENSE"
+	install -Dm644 README.md "$(STAGED_PREFIX)/share/doc/nameh/README.md"
+	install -Dm644 docs/USER_GUIDE.md "$(STAGED_PREFIX)/share/doc/nameh/USER_GUIDE.md"
+	install -Dm644 LICENSE "$(STAGED_PREFIX)/share/licenses/nameh/LICENSE"
 	$(MAKE) refresh-caches
 
 uninstall:
-	rm -f "$(STAGED_PREFIX)/bin/mdview" \
+	rm -f "$(STAGED_PREFIX)/bin/nameh" \
 	  "$(STAGED_PREFIX)/share/applications/$(APP_ID).desktop" \
 	  "$(STAGED_PREFIX)/share/icons/hicolor/scalable/apps/$(APP_ID).svg" \
 	  "$(STAGED_PREFIX)/share/mime/packages/$(APP_ID).xml" \
-	  "$(STAGED_PREFIX)/share/doc/mdview/README.md" \
-	  "$(STAGED_PREFIX)/share/doc/mdview/USER_GUIDE.md" \
-	  "$(STAGED_PREFIX)/share/licenses/mdview/LICENSE"
+	  "$(STAGED_PREFIX)/share/doc/nameh/README.md" \
+	  "$(STAGED_PREFIX)/share/doc/nameh/USER_GUIDE.md" \
+	  "$(STAGED_PREFIX)/share/licenses/nameh/LICENSE"
 	$(MAKE) refresh-caches
 
 refresh-caches:

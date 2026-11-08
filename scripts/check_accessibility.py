@@ -3,7 +3,7 @@
 
 Requires a release build, PyGObject/Atspi, dbus-daemon, at-spi2-registryd,
 hyprctl and wtype. Uses temporary accessibility bus/config; never changes desktop
-services. Stops keyboard input if mdview loses focus. This does not test speech.
+services. Stops keyboard input if nameh loses focus. This does not test speech.
 """
 import json
 import os
@@ -16,9 +16,9 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def main():
-    if subprocess.run(["pgrep", "-x", "mdview"], capture_output=True).returncode == 0:
-        raise RuntimeError("close existing mdview instances first")
-    with tempfile.TemporaryDirectory(prefix="mdview-accessibility-") as temporary:
+    if subprocess.run(["pgrep", "-x", "nameh|mdview"], capture_output=True).returncode == 0:
+        raise RuntimeError("close existing nameh instances first")
+    with tempfile.TemporaryDirectory(prefix="nameh-accessibility-") as temporary:
         config = Path(temporary)
         gtk_config = Path.home() / ".config/gtk-4.0"
         if gtk_config.exists():
@@ -44,7 +44,7 @@ def main():
                 if "true" in registered:
                     break
                 time.sleep(0.05)
-            app = subprocess.Popen([str(ROOT / "target/release/mdview"),
+            app = subprocess.Popen([str(ROOT / "target/release/nameh"),
                                     str(ROOT / "fixtures/rendering.md")], env=environment,
                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             def records():
@@ -67,7 +67,7 @@ def main():
                 desktop = Atspi.get_desktop(0)
                 for index in range(desktop.get_child_count()):
                     child = desktop.get_child_at_index(index)
-                    if child.get_name() == "mdview":
+                    if child.get_process_id() == app.pid:
                         walk(child)
                 return result
 
@@ -83,7 +83,7 @@ def main():
             def keys(*arguments):
                 active = json.loads(subprocess.check_output(["hyprctl", "activewindow", "-j"]))
                 if active.get("pid") != app.pid:
-                    raise RuntimeError("mdview lost focus; stopped keyboard input")
+                    raise RuntimeError("nameh lost focus; stopped keyboard input")
                 subprocess.run(["wtype", *arguments], check=True, timeout=5)
 
             def loaded_tree():
