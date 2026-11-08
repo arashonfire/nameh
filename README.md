@@ -100,7 +100,7 @@ desktop configuration. The binary links to the system GTK/GLib libraries; instal
 on a compatible Linux system with GTK 4.10 or newer. A binary built here is not a
 portable bundle or proof of compatibility with every GTK 4.10 distribution.
 
-Installed files are the binary, desktop entry, scalable icon, MIME declaration,
+Installed files are the binary, desktop entry, app icons, MIME declaration,
 README, [user guide](docs/USER_GUIDE.md), and MIT license. Cache tools run when
 available; no default application is selected. Choose **Nameh** through your
 file manager's **Open With** controls if desired.
@@ -170,7 +170,15 @@ Preferences live in `$XDG_CONFIG_HOME/mdview/preferences.ini`, or `~/.config/mdv
 
 ## Desktop integration and accessibility
 
-The desktop entry, scalable icon and Markdown MIME declarations live under `data/`. The desktop file uses `nameh %F`; the executable must be on the launcher's PATH. GApplication handles activation, single-instance forwarding and multiple local file arguments. `DBusActivatable=false` deliberately uses executable activation; there is no D-Bus service file. The desktop entry's X11 class is `nameh`; Wayland uses the application ID.
+The desktop entry, app icons and Markdown MIME declarations live under `data/`.
+Nameh's icon is an ivory envelope with a turquoise Persian geometric seal.
+The original transparent artwork is in `data/artwork/nameh-seal.png`; PNG icons
+from 16 to 512 pixels are installed into the hicolor theme. Reinstallation removes
+the previous SVG icon. The artwork was generated with the built-in image tool
+from a prompt describing an ivory envelope with a turquoise seal bearing a lapis
+Persian geometric star, as a modern Linux app icon on a transparent background.
+
+The desktop file uses `nameh %F`; the executable must be on the launcher's PATH. GApplication handles activation, single-instance forwarding and multiple local file arguments. `DBusActivatable=false` deliberately uses executable activation; there is no D-Bus service file. The desktop entry's X11 class is `nameh`; Wayland uses the application ID.
 
 Test a local installation without touching user directories or MIME defaults:
 

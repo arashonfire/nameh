@@ -65,10 +65,11 @@ def main():
                    CARGO_HOME=os.environ.get("CARGO_HOME", str(ROOT / ".cargo-home")))
         run("make", "-C", str(ROOT), "install", f"PREFIX={prefix}", env=env)
         installed = [binary, data / f"applications/{APP_ID}.desktop",
-                     data / f"icons/hicolor/scalable/apps/{APP_ID}.svg",
                      data / f"mime/packages/{APP_ID}.xml",
                      data / "doc/nameh/README.md", data / "doc/nameh/USER_GUIDE.md",
                      data / "licenses/nameh/LICENSE"]
+        installed.extend(data / f"icons/hicolor/{size}x{size}/apps/{APP_ID}.png"
+                         for size in [16, 24, 32, 48, 64, 128, 256, 512])
         assert all(path.is_file() for path in installed)
         assert binary.read_bytes() == (ROOT / "target/release/nameh").read_bytes()
         desktop = data / f"applications/{APP_ID}.desktop"

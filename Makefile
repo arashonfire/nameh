@@ -3,6 +3,7 @@ DESTDIR ?=
 CARGO ?= cargo
 CARGO_FLAGS ?= --locked --offline
 APP_ID := io.github.arash.mdview
+ICON_SIZES := 16 24 32 48 64 128 256 512
 STAGED_PREFIX := $(DESTDIR)$(PREFIX)
 
 .PHONY: build install uninstall refresh-caches
@@ -13,7 +14,10 @@ build:
 install: build
 	install -Dm755 target/release/nameh "$(STAGED_PREFIX)/bin/nameh"
 	install -Dm644 data/$(APP_ID).desktop "$(STAGED_PREFIX)/share/applications/$(APP_ID).desktop"
-	install -Dm644 data/icons/hicolor/scalable/apps/$(APP_ID).svg "$(STAGED_PREFIX)/share/icons/hicolor/scalable/apps/$(APP_ID).svg"
+	@set -e; for size in $(ICON_SIZES); do \
+	  install -Dm644 "data/icons/hicolor/$${size}x$${size}/apps/$(APP_ID).png" "$(STAGED_PREFIX)/share/icons/hicolor/$${size}x$${size}/apps/$(APP_ID).png"; \
+	done
+	rm -f "$(STAGED_PREFIX)/share/icons/hicolor/scalable/apps/$(APP_ID).svg"
 	install -Dm644 data/mime/packages/$(APP_ID).xml "$(STAGED_PREFIX)/share/mime/packages/$(APP_ID).xml"
 	install -Dm644 README.md "$(STAGED_PREFIX)/share/doc/nameh/README.md"
 	install -Dm644 docs/USER_GUIDE.md "$(STAGED_PREFIX)/share/doc/nameh/USER_GUIDE.md"
@@ -21,6 +25,9 @@ install: build
 	$(MAKE) refresh-caches
 
 uninstall:
+	@set -e; for size in $(ICON_SIZES); do \
+	  rm -f "$(STAGED_PREFIX)/share/icons/hicolor/$${size}x$${size}/apps/$(APP_ID).png"; \
+	done
 	rm -f "$(STAGED_PREFIX)/bin/nameh" \
 	  "$(STAGED_PREFIX)/share/applications/$(APP_ID).desktop" \
 	  "$(STAGED_PREFIX)/share/icons/hicolor/scalable/apps/$(APP_ID).svg" \
