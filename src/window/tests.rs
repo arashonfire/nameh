@@ -406,8 +406,12 @@ pub fn verify_reading(controller: &Rc<DocumentWindow>, application: &gtk::Applic
     let code = (0..40)
         .map(|i| format!("line {i} {}\n", "padding ".repeat(30)))
         .collect::<String>();
+    // Filler rows put the matching row far below the table's top.
+    let rows = (0..80)
+        .map(|i| format!("| row {i} | value {i} |\n"))
+        .collect::<String>();
     let source = format!(
-        "# Search\n\nCafé فارسی 日本語 café.\n\nbefore [**Label**](https://example.org/hidden-destination) after\n\n| Name | Value |\n| --- | --- |\n| Café | فارسی |\n\n```text\n{code}Café فارسی 日本語 target\n```\n"
+        "# Search\n\nCafé فارسی 日本語 café.\n\nbefore [**Label**](https://example.org/hidden-destination) after\n\n| Name | Value |\n| --- | --- |\n{rows}| Café | فارسی |\n\n```text\n{code}Café فارسی 日本語 target\n```\n"
     );
     fs::write(&path, &source).unwrap();
     controller.window.set_resizable(false);
@@ -451,6 +455,40 @@ pub fn verify_reading(controller: &Rc<DocumentWindow>, application: &gtk::Applic
     controller.update_search();
     wait_for_search(controller);
     assert!(link.has_css_class("mdview-search-active"));
+    // Table cells are highlighted, and the active hit in a cell far down a
+    // full-height table is scrolled into view by the document.
+    let cell = view
+        .embedded()
+        .into_iter()
+        .flat_map(|(a, _)| a.widgets())
+        .find_map(|w| crate::document_view::table_cells(&w))
+        .unwrap()
+        .into_iter()
+        .find(|cell| cell.text() == "فارسی")
+        .unwrap();
+    controller.search_entry.set_text("فارسی");
+    controller.update_search();
+    wait_for_search(controller);
+    assert!(
+        cell.attributes().is_some(),
+        "table cell hit not highlighted"
+    );
+    controller
+        .window
+        .lookup_action("find-next")
+        .unwrap()
+        .activate(None);
+    assert_eq!(controller.search_count.text(), "2 of 3");
+    glib::MainContext::default().block_on(glib::timeout_future(Duration::from_millis(400)));
+    let at = cell
+        .compute_point(&view, &gtk::graphene::Point::new(0.0, 0.0))
+        .unwrap();
+    assert!(
+        at.y() >= 0.0 && at.y() + cell.height() as f32 <= view.height() as f32,
+        "active table cell not revealed: y={} view={}",
+        at.y(),
+        view.height()
+    );
     controller.search_entry.set_text("target");
     controller.update_search();
     wait_for_search(controller);
@@ -524,6 +562,10 @@ pub fn verify_reading(controller: &Rc<DocumentWindow>, application: &gtk::Applic
         .activate(None);
     assert!(!controller.search_bar.reveals_child());
     assert_eq!(controller.search.borrow().position(), (0, 0));
+    assert!(
+        cell.attributes().is_none(),
+        "hiding search kept a cell highlight"
+    );
     assert!(
         gtk::prelude::RootExt::focus(&controller.window)
             .is_some_and(|w| w == view.clone().upcast::<gtk::Widget>())

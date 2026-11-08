@@ -12,6 +12,10 @@ mod imp {
         pub blocks: RefCell<Vec<(gtk::TextChildAnchor, String)>>,
         pub scrollers: RefCell<Vec<gtk::ScrolledWindow>>,
         pub fitted: RefCell<Vec<gtk::Widget>>,
+        /// Blocks that may be wider than the reading width (tables).
+        pub wide: RefCell<Vec<(gtk::ScrolledWindow, Option<super::OnWidth>)>>,
+        /// Paragraph margins for the lines holding wide blocks.
+        pub wide_tag: RefCell<Option<gtk::TextTag>>,
         pub headings: RefCell<std::collections::HashMap<String, gtk::TextMark>>,
         disposed: Cell<bool>,
     }
@@ -65,6 +69,23 @@ mod imp {
                     child.set_size_request(available, -1);
                 }
             }
+            if let Some(tag) = self.wide_tag.borrow().as_ref() {
+                // Wide blocks keep a small gutter, up to a 1600px block.
+                let wide_margin = ((width - 1600) / 2).max(24).min(margin);
+                if tag.left_margin() != wide_margin {
+                    tag.set_left_margin(wide_margin);
+                    tag.set_right_margin(wide_margin);
+                }
+                let wide = (width - wide_margin * 2).max(1);
+                for (block, on_width) in self.wide.borrow().iter() {
+                    if block.width_request() != wide {
+                        block.set_size_request(wide, -1);
+                        if let Some(on_width) = on_width {
+                            on_width(wide);
+                        }
+                    }
+                }
+            }
             self.parent_size_allocate(width, height, baseline);
         }
     }
@@ -102,6 +123,40 @@ impl Default for DocumentView {
         view.update_property(&[gtk::accessible::Property::Label("Markdown document")]);
         view
     }
+}
+
+/// Called with a wide block's new width.
+pub type OnWidth = std::rc::Rc<dyn Fn(i32)>;
+
+/// How tall an embedded scrolling block may grow.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum BlockHeight {
+    /// Capped; longer content scrolls inside the block (code).
+    Bounded,
+    /// As tall as its content; the document scrolls it (tables).
+    Full,
+}
+
+/// The cells of an embedded grid table in reading order, or `None` when
+/// `widget` is not one.
+pub(crate) fn table_cells(widget: &gtk::Widget) -> Option<Vec<gtk::Label>> {
+    let mut content = widget.downcast_ref::<gtk::ScrolledWindow>()?.child()?;
+    if let Some(viewport) = content.downcast_ref::<gtk::Viewport>() {
+        content = viewport.child()?;
+    }
+    if !content.has_css_class("mdview-table") {
+        return None;
+    }
+    let mut cells = Vec::new();
+    let mut child = content.first_child();
+    while let Some(widget) = child {
+        child = widget.next_sibling();
+        // Hidden header cells (card layout) and card field names are skipped.
+        if widget.has_css_class("mdview-cell") && widget.is_visible() {
+            cells.extend(widget.downcast::<gtk::Label>().ok());
+        }
+    }
+    Some(cells)
 }
 
 pub(crate) struct ReadingPosition {
@@ -161,7 +216,17 @@ impl DocumentView {
     }
 
     pub fn resize_blocks(&self) {
+        // Text size changed: wide blocks re-check their layout at their width.
+        for (block, on_width) in self.imp().wide.borrow().iter() {
+            if let Some(on_width) = on_width {
+                on_width(block.width_request());
+            }
+        }
         for scroller in self.imp().scrollers.borrow().iter() {
+            if scroller.vscrollbar_policy() == gtk::PolicyType::Never {
+                // Full-height blocks already follow their content's height.
+                continue;
+            }
             if let Some(block) = scroller.child().and_downcast::<gtk::TextView>() {
                 let context = block.pango_context();
                 let mut font = context.font_description().unwrap_or_default();
@@ -248,11 +313,30 @@ impl DocumentView {
             &block_buffer.start_iter(),
             &block_buffer.end_iter(),
         );
-        self.scrollable_view(&block, text, label);
+        self.scrollable_view(&block, text, label, BlockHeight::Bounded);
     }
 
-    pub fn scrollable_view(&self, block: &impl IsA<gtk::TextView>, text: &str, label: &str) {
+    pub fn scrollable_view(
+        &self,
+        block: &impl IsA<gtk::TextView>,
+        text: &str,
+        label: &str,
+        height: BlockHeight,
+    ) {
         let block = block.as_ref();
+        block.update_property(&[gtk::accessible::Property::Label(label)]);
+        if height == BlockHeight::Full {
+            // The block becomes part of the page: the document scrolls it
+            // vertically and the block only scrolls sideways.
+            let scroller = gtk::ScrolledWindow::builder()
+                .hscrollbar_policy(gtk::PolicyType::Automatic)
+                .vscrollbar_policy(gtk::PolicyType::Never)
+                .has_frame(true)
+                .child(block)
+                .build();
+            self.embed_scroller(&scroller, text.to_owned());
+            return;
+        }
         let context = block.pango_context();
         let mut font = context.font_description().unwrap_or_default();
         font.set_family("monospace");
@@ -261,7 +345,6 @@ impl DocumentView {
             (metrics.ascent() + metrics.descent() + gtk::pango::SCALE - 1) / gtk::pango::SCALE;
         let content_height =
             (text.split('\n').take(240).count().max(1) as i32 * line_height + 28).min(240);
-        block.update_property(&[gtk::accessible::Property::Label(label)]);
         let scroller = gtk::ScrolledWindow::builder()
             .hscrollbar_policy(gtk::PolicyType::Automatic)
             .vscrollbar_policy(gtk::PolicyType::Automatic)
@@ -274,6 +357,46 @@ impl DocumentView {
         scroller.set_size_request(320, -1);
         self.embed(&scroller, text.to_owned());
         self.imp().scrollers.borrow_mut().push(scroller);
+    }
+
+    /// Embeds a scrolling block that spans the document's text width.
+    pub fn embed_scroller(&self, scroller: &gtk::ScrolledWindow, plain_text: String) {
+        scroller.set_size_request(320, -1);
+        self.embed(scroller, plain_text);
+        self.imp().scrollers.borrow_mut().push(scroller.clone());
+    }
+
+    /// Embeds a block that may use more than the reading width when the
+    /// window is wide, keeping a small gutter on each side.
+    /// `on_width` hears each new width so the block can adapt its layout.
+    pub fn embed_wide(
+        &self,
+        scroller: &gtk::ScrolledWindow,
+        plain_text: String,
+        on_width: Option<OnWidth>,
+    ) {
+        scroller.set_size_request(320, -1);
+        let buffer = self.buffer();
+        let start = buffer.char_count();
+        self.embed(scroller, plain_text);
+        let tag = self
+            .imp()
+            .wide_tag
+            .borrow_mut()
+            .get_or_insert_with(|| {
+                let tag = gtk::TextTag::builder()
+                    .left_margin(24)
+                    .right_margin(24)
+                    .build();
+                buffer.tag_table().add(&tag);
+                tag
+            })
+            .clone();
+        buffer.apply_tag(&tag, &buffer.iter_at_offset(start), &buffer.end_iter());
+        self.imp()
+            .wide
+            .borrow_mut()
+            .push((scroller.clone(), on_width));
     }
 
     pub fn plain_text(&self, start: &gtk::TextIter, end: &gtk::TextIter) -> String {
@@ -394,7 +517,41 @@ mod tests {
         );
 
         let scrollers = view.imp().scrollers.borrow();
-        assert_eq!(scrollers.len(), 2, "table and code each have a scroller");
+        assert_eq!(scrollers.len(), 1, "code has a bounded scroller");
+        let tables: Vec<_> = view
+            .imp()
+            .wide
+            .borrow()
+            .iter()
+            .map(|(block, _)| block.clone())
+            .collect();
+        assert_eq!(tables.len(), 1, "the table is a wide block");
+        let table = &tables[0];
+        let cells = table_cells(table.upcast_ref()).expect("table has cells");
+        assert_eq!(cells.len(), 9, "three rows of three cells");
+        assert!(table.width() <= view.width() - 48, "table exceeds viewport");
+        let horizontal = table.hadjustment();
+        assert!(
+            horizontal.upper() <= horizontal.page_size() + 1.0,
+            "a long cell must wrap instead of scrolling sideways"
+        );
+        assert_eq!(table.vscrollbar_policy(), gtk::PolicyType::Never);
+        let long = cells
+            .iter()
+            .find(|cell| cell.text().starts_with("A deliberately wide"))
+            .unwrap();
+        assert!(
+            long.height() > cells[0].height(),
+            "the long cell did not wrap onto more lines"
+        );
+        assert!(cells[0].is_focusable() && !cells[4].is_focusable());
+        long.select_region(0, 14);
+        long.emit_by_name::<()>("copy-clipboard", &[]);
+        let copied = context
+            .block_on(long.clipboard().read_text_future())
+            .unwrap()
+            .unwrap();
+        assert_eq!(copied.as_str(), "A deliberately");
         for scroller in scrollers.iter() {
             eprintln!(
                 "layout: document={} block={} scroll_upper={} scroll_page={}",
@@ -460,6 +617,10 @@ mod tests {
             );
         }
         assert!(
+            focused.contains(cells[0].upcast_ref()),
+            "Tab traversal skipped the table"
+        );
+        assert!(
             focused.iter().any(|widget| widget.is::<gtk::LinkButton>()),
             "Tab traversal skipped the link"
         );
@@ -473,7 +634,7 @@ mod tests {
         window.set_default_size(900, 600);
         context.block_on(glib::timeout_future(Duration::from_millis(200)));
         assert_eq!(view.width(), 900, "test window did not resize wider");
-        for scroller in view.imp().scrollers.borrow().iter() {
+        for scroller in view.imp().scrollers.borrow().iter().chain(&tables) {
             assert!(scroller.width() <= 852);
             assert!(
                 scroller.width() > 800,
@@ -483,7 +644,7 @@ mod tests {
         window.set_default_size(360, 600);
         context.block_on(glib::timeout_future(Duration::from_millis(200)));
         assert_eq!(view.width(), 360, "test window did not resize narrower");
-        for scroller in view.imp().scrollers.borrow().iter() {
+        for scroller in view.imp().scrollers.borrow().iter().chain(&tables) {
             assert!(
                 scroller.width() <= 312,
                 "block failed to shrink with the viewport"

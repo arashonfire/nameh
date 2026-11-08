@@ -6,21 +6,31 @@ use std::sync::{
     atomic::{AtomicBool, Ordering},
 };
 
+/// Where a run of searchable text lives.
+#[derive(Clone)]
+enum Target {
+    /// Characters of a text buffer.
+    Text(gtk::TextView),
+    /// An embedded widget standing for one anchor character of a buffer.
+    Widget(gtk::TextView, gtk::Widget),
+    /// A table cell; offsets are characters of the label's text.
+    Cell(gtk::Label),
+    /// A separator between table cells; never highlighted.
+    Gap,
+}
+
 #[derive(Clone)]
 struct Span {
     start: i32,
     end: i32,
-    view: gtk::TextView,
+    target: Target,
     offset: i32,
-    atomic: bool,
-    widget: Option<gtk::Widget>,
     parents: Vec<(gtk::TextView, i32)>,
 }
 
 #[derive(Clone)]
 struct Piece {
-    widget: Option<gtk::Widget>,
-    view: gtk::TextView,
+    target: Target,
     start: i32,
     end: i32,
     parents: Vec<(gtk::TextView, i32)>,
@@ -31,6 +41,8 @@ pub struct Search {
     hits: Vec<(i32, i32)>,
     spans: Vec<Span>,
     buffers: Vec<gtk::TextBuffer>,
+    /// Highlighted ranges of table cells: (cell, start, end, active).
+    cells: Vec<(gtk::Label, i32, i32, bool)>,
     active: usize,
     indexed: Option<(DocumentView, String)>,
     cancelled: Arc<AtomicBool>,
@@ -70,10 +82,26 @@ fn collect<'a>(
                 .and_then(|w| w.downcast_ref::<gtk::ScrolledWindow>())
                 .and_then(|s| s.child())
                 .and_downcast::<gtk::TextView>();
+            let cells = widget.as_ref().and_then(crate::document_view::table_cells);
             if let Some(child) = child {
                 let mut parents = parents.to_vec();
                 parents.push((view.clone(), at));
                 collect(&child, &parents, text, spans).await;
+            } else if let Some(cells) = cells {
+                let mut parents = parents.to_vec();
+                parents.push((view.clone(), at));
+                for (index, cell) in cells.into_iter().enumerate() {
+                    if index > 0 {
+                        // Keep matches from running across cells.
+                        push(text, spans, "\n", span(Target::Gap, 0, &parents));
+                    }
+                    push(
+                        text,
+                        spans,
+                        &cell.text(),
+                        span(Target::Cell(cell), 0, &parents),
+                    );
+                }
             } else {
                 // Link destinations are copy metadata, not rendered text.
                 let label = widget
@@ -85,21 +113,30 @@ fn collect<'a>(
                     text,
                     spans,
                     label.as_deref().unwrap_or(&replacement),
-                    Span {
-                        start: 0,
-                        end: 0,
-                        view: view.clone(),
-                        offset: at,
-                        atomic: true,
-                        widget: widget.clone(),
-                        parents: parents.to_vec(),
-                    },
+                    span(
+                        match widget {
+                            Some(widget) => Target::Widget(view.clone(), widget),
+                            None => Target::Text(view.clone()),
+                        },
+                        at,
+                        parents,
+                    ),
                 );
             }
             offset = at + 1;
         }
         collect_text(view, parents, offset, buffer.char_count(), text, spans).await;
     })
+}
+
+fn span(target: Target, offset: i32, parents: &[(gtk::TextView, i32)]) -> Span {
+    Span {
+        start: 0,
+        end: 0,
+        target,
+        offset,
+        parents: parents.to_vec(),
+    }
 }
 
 async fn collect_text(
@@ -122,15 +159,7 @@ async fn collect_text(
                 &buffer.iter_at_offset(next),
                 false,
             ),
-            Span {
-                start: 0,
-                end: 0,
-                view: view.clone(),
-                offset,
-                atomic: false,
-                widget: None,
-                parents: parents.to_vec(),
-            },
+            span(Target::Text(view.clone()), offset, parents),
         );
         offset = next;
         if slice.elapsed() >= std::time::Duration::from_millis(4) {
@@ -144,15 +173,18 @@ impl Search {
     pub fn clear(&mut self) {
         self.cancelled.store(true, Ordering::Relaxed);
         if let Some(hit) = self.hits.get(self.active) {
-            Self::tag(&self.pieces(*hit), "mdview-search-active", false);
+            self.tag(&self.pieces(*hit), "mdview-search-active", false);
         }
         for hit in self.hits.iter().take(1000) {
             for piece in self.pieces(*hit) {
-                if let Some(widget) = &piece.widget {
+                if let Target::Widget(_, widget) = &piece.target {
                     widget.remove_css_class("mdview-search-hit");
                     widget.remove_css_class("mdview-search-active");
                 }
             }
+        }
+        for (cell, ..) in std::mem::take(&mut self.cells) {
+            cell.set_attributes(None);
         }
         for buffer in &self.buffers {
             if let Some(mark) = buffer.mark("mdview-search-reveal") {
@@ -197,15 +229,14 @@ impl Search {
             .await
             .unwrap_or_default();
         for span in &spans {
-            let buffer = span.view.buffer();
+            let (Target::Text(view) | Target::Widget(view, _)) = &span.target else {
+                continue;
+            };
+            let buffer = view.buffer();
             if self.buffers.contains(&buffer) {
                 continue;
             }
-            let context = span.view.style_context();
-            let color = context
-                .lookup_color("theme_selected_bg_color")
-                .or_else(|| context.lookup_color("accent_bg_color"))
-                .unwrap_or_else(|| span.view.color());
+            let (color, active_fg) = highlight_colors(view);
             for (name, alpha) in [("mdview-search", 0.28), ("mdview-search-active", 1.0)] {
                 let tag = buffer.tag_table().lookup(name).unwrap_or_else(|| {
                     let tag = gtk::TextTag::builder().name(name).build();
@@ -217,25 +248,23 @@ impl Search {
                 tag.set_background_rgba(Some(&color));
                 if name.ends_with("active") {
                     tag.set_underline(gtk::pango::Underline::Double);
-                    tag.set_foreground_rgba(
-                        context.lookup_color("theme_selected_fg_color").as_ref(),
-                    );
+                    tag.set_foreground_rgba(Some(&active_fg));
                 }
             }
             self.buffers.push(buffer);
         }
         self.spans = spans;
         // Bound native tag segments. Count/navigation still include every hit.
-        for (index, hit) in self.hits.iter().take(1000).enumerate() {
-            Self::tag(&self.pieces(*hit), "mdview-search", true);
+        for index in 0..self.hits.len().min(1000) {
+            self.tag(&self.pieces(self.hits[index]), "mdview-search", true);
             if index % 100 == 99 {
                 glib::timeout_future(std::time::Duration::from_millis(1)).await;
             }
         }
         if reveal {
             self.reveal();
-        } else if let Some(hit) = self.hits.first() {
-            Self::tag(&self.pieces(*hit), "mdview-search-active", true);
+        } else if let Some(&hit) = self.hits.first() {
+            self.tag(&self.pieces(hit), "mdview-search-active", true);
         }
     }
 
@@ -244,41 +273,54 @@ impl Search {
         self.spans[begin..]
             .iter()
             .take_while(|s| s.start < end)
-            .map(|s| Piece {
-                widget: s.widget.clone(),
-                view: s.view.clone(),
-                start: s.offset
-                    + if s.atomic {
-                        0
-                    } else {
-                        (start - s.start).max(0)
-                    },
-                end: s.offset
-                    + if s.atomic {
-                        1
-                    } else {
-                        (end.min(s.end) - s.start).max(0)
-                    },
-                parents: s.parents.clone(),
+            .filter(|s| !matches!(s.target, Target::Gap))
+            .map(|s| {
+                let (from, to) = if matches!(s.target, Target::Widget(..)) {
+                    (0, 1)
+                } else {
+                    ((start - s.start).max(0), (end.min(s.end) - s.start).max(0))
+                };
+                Piece {
+                    target: s.target.clone(),
+                    start: s.offset + from,
+                    end: s.offset + to,
+                    parents: s.parents.clone(),
+                }
             })
             .collect()
     }
 
-    fn tag(hit: &[Piece], name: &str, apply: bool) {
+    fn tag(&mut self, hit: &[Piece], name: &str, apply: bool) {
+        let active = name.ends_with("active");
         for piece in hit {
-            if let Some(widget) = &piece.widget {
-                let class = if name.ends_with("active") {
-                    "mdview-search-active"
-                } else {
-                    "mdview-search-hit"
-                };
-                if apply {
-                    widget.add_css_class(class);
-                } else {
-                    widget.remove_css_class(class);
+            let view = match &piece.target {
+                Target::Text(view) => view,
+                Target::Widget(view, widget) => {
+                    let class = if active {
+                        "mdview-search-active"
+                    } else {
+                        "mdview-search-hit"
+                    };
+                    if apply {
+                        widget.add_css_class(class);
+                    } else {
+                        widget.remove_css_class(class);
+                    }
+                    view
                 }
-            }
-            let buffer = piece.view.buffer();
+                Target::Cell(cell) => {
+                    let mark = (cell.clone(), piece.start, piece.end, active);
+                    if apply {
+                        self.cells.push(mark);
+                    } else if let Some(index) = self.cells.iter().position(|m| *m == mark) {
+                        self.cells.swap_remove(index);
+                    }
+                    self.paint(cell);
+                    continue;
+                }
+                Target::Gap => continue,
+            };
+            let buffer = view.buffer();
             let tag = buffer.tag_table().lookup(name).unwrap();
             let (start, end) = (
                 buffer.iter_at_offset(piece.start),
@@ -292,17 +334,89 @@ impl Search {
         }
     }
 
-    fn reveal(&self) {
-        let Some(hit) = self.hits.get(self.active) else {
+    /// Redraws a cell's highlights from its recorded ranges.
+    fn paint(&self, cell: &gtk::Label) {
+        let marks: Vec<_> = self.cells.iter().filter(|m| &m.0 == cell).collect();
+        if marks.is_empty() {
+            cell.set_attributes(None);
+            return;
+        }
+        let (background, foreground) = highlight_colors(cell);
+        let channel = |value: f32| (value.clamp(0.0, 1.0) * 65535.0) as u16;
+        let text = cell.text();
+        let byte = |offset: i32| {
+            text.char_indices()
+                .nth(offset as usize)
+                .map_or(text.len(), |(index, _)| index) as u32
+        };
+        let list = gtk::pango::AttrList::new();
+        for (_, start, end, active) in &marks {
+            // An active mark replaces the plain highlight of the same range.
+            if !active && marks.iter().any(|m| m.3 && (m.1, m.2) == (*start, *end)) {
+                continue;
+            }
+            let (start, end) = (byte(*start), byte(*end));
+            let mut attributes: Vec<gtk::pango::Attribute> = vec![
+                gtk::pango::AttrColor::new_background(
+                    channel(background.red()),
+                    channel(background.green()),
+                    channel(background.blue()),
+                )
+                .into(),
+                gtk::pango::AttrInt::new_background_alpha(if *active {
+                    65535
+                } else {
+                    channel(0.28)
+                })
+                .into(),
+            ];
+            if *active {
+                attributes
+                    .push(gtk::pango::AttrInt::new_underline(gtk::pango::Underline::Double).into());
+                attributes.push(
+                    gtk::pango::AttrColor::new_foreground(
+                        channel(foreground.red()),
+                        channel(foreground.green()),
+                        channel(foreground.blue()),
+                    )
+                    .into(),
+                );
+            }
+            for mut attribute in attributes {
+                attribute.set_start_index(start);
+                attribute.set_end_index(end);
+                list.insert(attribute);
+            }
+        }
+        cell.set_attributes(Some(&list));
+    }
+
+    fn reveal(&mut self) {
+        let Some(&hit) = self.hits.get(self.active) else {
             return;
         };
-        let pieces = self.pieces(*hit);
-        Self::tag(&pieces, "mdview-search-active", true);
+        let pieces = self.pieces(hit);
+        self.tag(&pieces, "mdview-search-active", true);
         if let Some(piece) = pieces.first() {
             for (view, offset) in &piece.parents {
                 reveal_offset(view, *offset);
             }
-            reveal_offset(&piece.view, piece.start);
+            let outer = piece.parents.first().map(|(view, _)| view.clone());
+            match &piece.target {
+                Target::Cell(cell) => reveal_in(cell.upcast_ref(), None, outer),
+                Target::Text(view) | Target::Widget(view, _) => {
+                    reveal_offset(view, piece.start);
+                    // A full-height block cannot scroll itself; the document must.
+                    let full = view
+                        .parent()
+                        .and_downcast::<gtk::ScrolledWindow>()
+                        .is_some_and(|s| s.vscrollbar_policy() == gtk::PolicyType::Never);
+                    if full {
+                        reveal_in(view.upcast_ref(), Some(piece.start), outer);
+                    }
+                }
+                Target::Gap => {}
+            }
         }
     }
 
@@ -310,7 +424,7 @@ impl Search {
         if self.hits.is_empty() {
             return;
         }
-        Self::tag(
+        self.tag(
             &self.pieces(self.hits[self.active]),
             "mdview-search-active",
             false,
@@ -324,13 +438,13 @@ impl Search {
         if self.hits.is_empty() {
             return;
         }
-        Self::tag(
+        self.tag(
             &self.pieces(self.hits[self.active]),
             "mdview-search-active",
             false,
         );
         self.active = index.min(self.hits.len() - 1);
-        Self::tag(
+        self.tag(
             &self.pieces(self.hits[self.active]),
             "mdview-search-active",
             true,
@@ -361,8 +475,113 @@ fn reveal_offset(view: &gtk::TextView, offset: i32) {
     view.scroll_to_mark(&mark, 0.1, true, 0.5, 0.5);
 }
 
+/// Scrolls the document `outer` so `widget` (or, for a text view, the
+/// character at `offset`) is centred, once layout has settled. Used for
+/// content that cannot scroll itself: table cells and full-height blocks.
+fn reveal_in(widget: &gtk::Widget, offset: Option<i32>, outer: Option<gtk::TextView>) {
+    let Some(outer) = outer else {
+        return;
+    };
+    let widget = widget.clone();
+    let last = std::cell::Cell::new(None);
+    let ticks = std::cell::Cell::new(0);
+    outer.add_tick_callback(move |outer, _| {
+        ticks.set(ticks.get() + 1);
+        let (x, y, height) = match (offset, widget.downcast_ref::<gtk::TextView>()) {
+            (Some(offset), Some(view)) => {
+                let rect = view.iter_location(&view.buffer().iter_at_offset(offset));
+                let (x, y) =
+                    view.buffer_to_window_coords(gtk::TextWindowType::Widget, rect.x(), rect.y());
+                (x as f32, y as f32, rect.height())
+            }
+            _ => (0.0, 0.0, widget.height()),
+        };
+        let point = widget.compute_point(outer, &gtk::graphene::Point::new(x, y));
+        let value = outer.vadjustment().map_or(0, |a| a.value() as i64);
+        let now = point.map(|p| (p.y() as i32, value));
+        // Wait until the document has applied its own pending scroll.
+        if now.is_none() || now != last.replace(now) {
+            return if ticks.get() < 40 {
+                glib::ControlFlow::Continue
+            } else {
+                glib::ControlFlow::Break
+            };
+        }
+        let point = point.unwrap();
+        // A wide table scrolls sideways inside its own frame.
+        if offset.is_none()
+            && let Some(scroller) = widget
+                .ancestor(gtk::ScrolledWindow::static_type())
+                .and_downcast::<gtk::ScrolledWindow>()
+            && let Some(content) = scroller.child()
+            && let Some(at) = widget.compute_point(&content, &gtk::graphene::Point::new(0.0, 0.0))
+        {
+            let a = scroller.hadjustment();
+            let (left, right) = (at.x() as f64, (at.x() + widget.width() as f32) as f64);
+            if left < a.value() || right > a.value() + a.page_size() {
+                a.set_value((left - 24.0).clamp(a.lower(), a.upper() - a.page_size()));
+            }
+        }
+        if let Some(a) = outer.vadjustment() {
+            let target = a.value() + point.y() as f64 - (a.page_size() - height as f64) / 2.0;
+            a.set_value(target.clamp(a.lower(), (a.upper() - a.page_size()).max(a.lower())));
+        }
+        glib::ControlFlow::Break
+    });
+}
+
 /// Unicode case folding on a worker, retaining original character offsets even
 /// for expansions such as ß -> ss. GTK objects never cross the thread boundary.
+/// The opaque hit background and the text color for the active hit on it.
+///
+/// Prefers the theme's solid accent pair. Some themes define selection as a
+/// translucent tint whose foreground is the tint's own hue, which becomes
+/// invisible once the tint is made opaque, so the pair is also checked for
+/// contrast and falls back to black or white text.
+// GTK 4.10 has no replacement for resolving named theme colors.
+#[allow(deprecated)]
+pub(crate) fn highlight_colors(widget: &impl IsA<gtk::Widget>) -> (gtk::gdk::RGBA, gtk::gdk::RGBA) {
+    let context = widget.style_context();
+    let pair = |bg: &str, fg: &str| Some((context.lookup_color(bg)?, context.lookup_color(fg)));
+    let (mut background, foreground) = pair("accent_bg_color", "accent_fg_color")
+        .or_else(|| pair("theme_selected_bg_color", "theme_selected_fg_color"))
+        .unwrap_or_else(|| (widget.as_ref().color(), None));
+    background.set_alpha(1.0);
+    let foreground = foreground
+        .map(|mut color| {
+            color.set_alpha(1.0);
+            color
+        })
+        .filter(|color| contrast(color, &background) >= 4.5)
+        .unwrap_or_else(|| {
+            let (black, white) = (gtk::gdk::RGBA::BLACK, gtk::gdk::RGBA::WHITE);
+            if contrast(&black, &background) >= contrast(&white, &background) {
+                black
+            } else {
+                white
+            }
+        });
+    (background, foreground)
+}
+
+/// WCAG contrast ratio between two opaque colors.
+fn contrast(a: &gtk::gdk::RGBA, b: &gtk::gdk::RGBA) -> f32 {
+    let luminance = |color: &gtk::gdk::RGBA| {
+        let linear = |value: f32| {
+            if value <= 0.04045 {
+                value / 12.92
+            } else {
+                ((value + 0.055) / 1.055).powf(2.4)
+            }
+        };
+        0.2126 * linear(color.red())
+            + 0.7152 * linear(color.green())
+            + 0.0722 * linear(color.blue())
+    };
+    let (a, b) = (luminance(a), luminance(b));
+    (a.max(b) + 0.05) / (a.min(b) + 0.05)
+}
+
 fn match_ranges(text: &str, query: &str, cancelled: &AtomicBool) -> Vec<(i32, i32)> {
     let query = glib::casefold(query);
     if query.is_empty() {
@@ -430,6 +649,17 @@ impl Drop for Search {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn same_hue_selection_text_fails_contrast() {
+        let rgba = |s: &str| gtk::gdk::RGBA::parse(s).unwrap();
+        // A theme's translucent-tint selection: text in the tint's own hue.
+        assert!(super::contrast(&rgba("#ffb3b6"), &rgba("#ffb3b6")) < 1.01);
+        assert!(super::contrast(&rgba("#67001e"), &rgba("#ffb3b6")) >= 4.5);
+        assert!(
+            (super::contrast(&gtk::gdk::RGBA::BLACK, &gtk::gdk::RGBA::WHITE) - 21.0).abs() < 0.01
+        );
+    }
+
     fn match_ranges(text: &str, query: &str) -> Vec<(i32, i32)> {
         super::match_ranges(text, query, &std::sync::atomic::AtomicBool::new(false))
     }

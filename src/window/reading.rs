@@ -124,7 +124,11 @@ impl DocumentWindow {
             .unwrap_or(11.0);
         let size = base_font * f64::from(zoom) / 100.0;
         let id = self.body.widget_name();
-        self.zoom_style.load_from_data(&format!("#{id} textview, #{id} button {{ font-size: {size:.2}pt; }} #{id} .mdview-search-hit {{ background-color: alpha(@theme_selected_bg_color, 0.28); }} #{id} .mdview-search-active {{ background-color: @theme_selected_bg_color; color: @theme_selected_fg_color; }}"));
+        // Match the text and table-cell highlights exactly.
+        let (background, foreground) = crate::search::highlight_colors(&self.body);
+        let mut hit = background;
+        hit.set_alpha(0.28);
+        self.zoom_style.load_from_data(&format!("#{id} textview, #{id} button, #{id} label.mdview-cell {{ font-size: {size:.2}pt; }} #{id} .mdview-search-hit {{ background-color: {hit}; }} #{id} .mdview-search-active {{ background-color: {background}; color: {foreground}; }}"));
         if let Some(view) = self.state.borrow().view.clone() {
             // Let CSS/Pango update before remeasuring embedded block heights.
             glib::idle_add_local_once(move || view.resize_blocks());

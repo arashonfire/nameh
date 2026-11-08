@@ -93,7 +93,8 @@ def main():
             def text(name):
                 return next(x["text"] for x in tree if x["name"] == name)
             assert "Café — Ελληνικά — فارسی — 日本語" in text("Markdown document")
-            assert "Alpha | Bold and italic" in text("Markdown table")
+            assert any(x["name"] == "Markdown table" for x in tree)
+            assert any("Bold and italic" in (x["text"] or x["name"] or "") for x in tree)
             assert text("Code block: text").startswith("    Indentation")
             assert any(x["role"] == "image" and x["name"] == "A small colored square" for x in tree)
             assert [x["name"] for x in tree if x["role"] == "link"] == ["Basic fixture", "Unicode path", "Long code"]
