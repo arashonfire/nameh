@@ -42,6 +42,28 @@ all five for readable content. Run reload measurements on an empty workspace
 with stable geometry, keeping Nameh focused; they take about two minutes each.
 No benchmark changes GTK's renderer, GPU cache, desktop configuration or MIME defaults.
 
+## Nameh command rename follow-up
+
+The package, library crate and executable are now `nameh`; desktop/window labels
+use **Nameh** and the launcher runs `nameh %F`. The application/asset ID remains
+`io.github.arash.mdview`, and existing preferences retain their path. Installation
+now places the binary at `PREFIX/bin/nameh` and documentation/license files under
+`share/doc/nameh` and `share/licenses/nameh`.
+
+Formatting, locked/offline check, strict all-target Clippy, all 16 tests and the
+release build pass after the rename. Actual Makefile installation/uninstallation
+and Unicode multi-file launching pass on Wayland and Xwayland in a disposable
+prefix; MIME defaults are unchanged. Real AT-SPI/reading-key checks and the
+Linux x86-64 network trace also pass for the renamed binary. The accessibility
+harness now identifies its own process by PID rather than assuming a particular
+AT-SPI application label. Orca remains unavailable.
+
+Renamed release SHA-256:
+`36f0da738e8ce756040be02b1bb51f5752cbcebab1aaf617810282601b525af0`.
+No dependency version/checksum changed. Performance measurements and screenshots
+below remain historical results from before the executable rename; no new startup
+or RSS acceptance measurement was performed for this follow-up.
+
 ## Build and functional checklist
 
 | Check | Result and evidence |

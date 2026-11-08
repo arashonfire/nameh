@@ -385,6 +385,16 @@ verification limits are recorded in docs/RELEASE_VALIDATION.md.
 - Validation: reviewed the documentation diff, checked whitespace and local Markdown links, and confirmed only the five intended Markdown files changed. Application tests were not rerun for prose-only edits; previous validation results remain historical evidence.
 - Next: all nine implementation steps remain complete. No further task started; use the available Git repository for subsequent work.
 
+### Nameh executable and launcher rename session (2026-11-07)
+
+- Request: use `nameh` as the actual app command, including the Local installation example. Inspected the clean repository at `69378a7` before editing; no commit was created in this session.
+- Completed: renamed the Cargo package/library crate/executable to `nameh`, updated Rust imports and the root lockfile package name, installed `bin/nameh`, and changed desktop Exec to `nameh %F`, launcher/application/window labels to **Nameh**, and X11 StartupWMClass to `nameh`. Installed documentation/license directories now use `nameh`. Updated live scripts and documentation examples to invoke the renamed executable.
+- Compatibility: retained `io.github.arash.mdview` application/asset IDs, the existing preference directory and internal CSS/widget identifiers. Saved settings and stable desktop identity need no migration. Historical records, raw evidence and license attribution remain intact. No dependency versions/checksums, MIME defaults, persistent installation or desktop configuration changed.
+- Validation: `cargo fmt --check`, locked/offline check, strict all-target Clippy, all 16 tests and release build pass. Full regression main-loop gaps: 16.72 ms prose/search and 19.58 ms code; contrast remains 13.77:1. Actual Makefile install/uninstall, Unicode multi-file forwarding and new **Nameh** titles pass on native Wayland and Xwayland in a disposable prefix; unrelated files and original MIME defaults are preserved.
+- Accessibility/network: real AT-SPI/keyboard Find/next/Escape/picker/zoom/heading checks pass. The first harness attempt timed out because it assumed a display-name match; selecting the launched process by AT-SPI PID fixes the check. Network tracer controls pass, opening the renamed executable records only permitted Unix IPC, source bytes are unchanged and exit is 0. Release SHA-256 is `36f0da738e8ce756040be02b1bb51f5752cbcebab1aaf617810282601b525af0`. Python syntax, local documentation links and diff whitespace checked.
+- Limits: existing Orca/speech, physical gestures, external handlers and broader platform/performance limits remain. No new startup/RSS acceptance measurement is claimed for the renamed binary; the release report clearly labels earlier measurements as historical.
+- Next: all nine implementation steps remain complete. Build/install with `export CARGO_HOME="$PWD/.cargo-home"` and `make install PREFIX="$HOME/.local"`, then run `nameh "fixtures/notes/Unicode café.md"`. No further task started.
+
 Append future records here. Include completed work, changed files, decisions, checks and results, unresolved issues, and the next step.
 
 ## Handover template

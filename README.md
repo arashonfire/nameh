@@ -57,6 +57,29 @@ For an optimized build, use `cargo build --release --locked`.
 
 ## Local installation and removal
 
+Build and install with the installer script:
+
+```sh
+./install.sh
+```
+
+This builds the locked release (downloading Cargo dependencies if needed) and
+installs into `~/.local`. It adds the application-menu shortcut, icon, and Markdown
+MIME definitions and refreshes available desktop caches. It uses this checkout's
+`.cargo-home` cache when present, unless you set `CARGO_HOME` yourself. Build
+prerequisites and cache tools are listed below; the script does not install them.
+Use `./install.sh --offline` when dependencies are already cached.
+
+Remove it with:
+
+```sh
+./uninstall.sh
+```
+
+Both scripts accept `--prefix /absolute/path` (or `PREFIX`) and honor `DESTDIR`.
+Use the same prefix when uninstalling. The uninstaller requires `make`, but does
+not require Rust or rebuild the app. Run either script with `--help` for details.
+
 Install build prerequisites above plus `make`. For desktop/MIME cache updates,
 install `desktop-file-utils` and `shared-mime-info`; `gtk-update-icon-cache` is
 optional. Fetch locked dependencies once, then build and install offline:
