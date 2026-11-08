@@ -1,4 +1,9 @@
-# mdview 0.1.0 release validation
+# Nameh 0.1.0 release validation
+
+These results were recorded under the working name `mdview`. The app is now named
+Nameh; the measured executable, application ID, paths, screenshots and raw evidence
+retain their existing identifiers. The user has since initialized Git with commit
+`5a3625d` (`first commit`); earlier validation predates the repository.
 
 Step 9 is complete with the verification limits below. The user explicitly accepted
 the measured fresh-process startup results with OS caches warm/uncontrolled.
@@ -26,13 +31,13 @@ python scripts/measure_reload.py --output /tmp/mdview-prose.jsonl
 python scripts/measure_reload.py --large-kind code --output /tmp/mdview-code.jsonl
 ```
 
-Use new output paths. Run graphical checks sequentially with no existing mdview;
+Use new output paths. Run graphical checks sequentially with no existing Nameh process;
 the network check requires Linux x86-64, a C compiler and permission to trace its
 own children. The startup script requires Hyprland 0.57's Lua dispatcher, grim,
 gdbus and wtype. It uses an empty temporary workspace, restores the original
 workspace/monitor, and writes five screenshots beside its JSONL output. Inspect
 all five for readable content. Run reload measurements on an empty workspace
-with stable geometry, keeping mdview focused; they take about two minutes each.
+with stable geometry, keeping Nameh focused; they take about two minutes each.
 No benchmark changes GTK's renderer, GPU cache, desktop configuration or MIME defaults.
 
 ## Build and functional checklist
@@ -71,7 +76,7 @@ containing Unicode prose, a blocked remote image and an inactive web link, with
 isolated preferences on an empty workspace. Window allocation was **1520 × 956**
 logical pixels. OS filesystem caches were warm/uncontrolled; no cache eviction or
 reboot was performed. Here cold application launch means a fresh application
-process with no existing mdview instance; cold OS-cache performance is unmeasured.
+process with no existing Nameh instance; cold OS-cache performance is unmeasured.
 
 The clock starts before process creation. The script waits until the compositor
 reports a mapped window with the loaded document's title, allows 40 ms for frames,
@@ -139,7 +144,7 @@ Largest sampling gaps: 14.17 / 13.39 ms. Evidence:
 ## Runtime network check
 
 `check_network.py` builds `trace_network.c` into a temporary directory. Before
-opening mdview it verifies that an AF_UNIX control passes and an AF_INET socket
+opening Nameh it verifies that an AF_UNIX control passes and an AF_INET socket
 creation control fails. The helper uses Linux ptrace syscall-entry records and
 follows clone/fork/vfork/exec descendants, including worker threads. It rejects
 socket families other than AF_UNIX, non-Unix connect/sendto addresses, unsupported

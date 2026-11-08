@@ -1,6 +1,19 @@
-# Lightweight Markdown Viewer Implementation Plan
+# Nameh Implementation Plan
 
 Build a small Linux application for reading local Markdown files using Rust, GTK4, and pulldown-cmark. Implement one step per session, validate it, update this document, and finish with a copyable handover for a new session. Steps 1–9 are complete with recorded verification limits; see the latest session record and docs/RELEASE_VALIDATION.md. The user selected MIT and accepted the measured fresh-process startup results with OS caches warm/uncontrolled. No release publication or persistent installation has occurred.
+
+## Project name and repository
+
+The user chose **Nameh** as the app's name and initialized Git with commit
+`5a3625d` (`first commit`). Git history is now available; inspect `git status` and
+`git diff` before changing files and preserve unrelated work.
+
+The implementation currently retains the working identifier `mdview` for the
+Cargo package/executable, application ID `io.github.arash.mdview`, window/desktop
+labels, installed asset names and preference paths. This documentation update
+adopts Nameh as the product name; documented commands continue to match the code.
+Earlier session records are historical: their statements about unavailable Git
+history describe those sessions before the user initialized the repository.
 
 ## Session workflow
 
@@ -363,6 +376,14 @@ verification limits are recorded in docs/RELEASE_VALIDATION.md.
 - Limits: speech/announcement review unavailable without Orca; physical pointer/file-manager gestures, actual external handlers, standalone Xorg, other libc targets, broader GTK 4.10 platform compatibility and pathological unbroken/link-heavy/deeply nested/image/table-heavy 5 MB profiling remain unverified. These are recorded limits, not checks described as passing. Idle operation retains the existing event-driven design with no permanent polling source. No user document, persistent preferences, desktop configuration or MIME defaults changed.
 - Next: no further numbered implementation step. Stop. Future publication/packaging formats, manual verification or new features need a new user request. Reproduce using docs/RELEASE_VALIDATION.md and the README; run graphical scripts sequentially with no existing mdview and new result paths.
 
+### Nameh naming and Git documentation session (2026-11-07)
+
+- User decisions: the app is named **Nameh**; the user initialized Git. Verified initial commit `5a3625d` (`first commit`) and a clean working tree before these edits.
+- Completed: updated README, user guide, release report, rendering report and this plan with the chosen product name and current repository status. Historical session records and measurement evidence remain accurate for their original environment; current guidance supersedes the old no-history statements.
+- Scope: documentation only. The actual `mdview` command/Cargo package, application ID, desktop/window labels, preferences, assets and license attribution retain their existing identifiers. No implementation rename, new release measurement or commit is claimed.
+- Validation: reviewed the documentation diff, checked whitespace and local Markdown links, and confirmed only the five intended Markdown files changed. Application tests were not rerun for prose-only edits; previous validation results remain historical evidence.
+- Next: all nine implementation steps remain complete. No further task started; use the available Git repository for subsequent work.
+
 Append future records here. Include completed work, changed files, decisions, checks and results, unresolved issues, and the next step.
 
 ## Handover template
@@ -370,7 +391,9 @@ Append future records here. Include completed work, changed files, decisions, ch
 At the end of each implementation session, fill in this template and include it as a copyable text block in the response. Use actual results and paths. The handover must be sufficient for a new session to continue without the earlier conversation.
 
 ```text
-Continue the lightweight Linux Markdown viewer in /home/arash/Documents/markdown.
+Continue Nameh, the lightweight Linux Markdown viewer, in /home/arash/Documents/markdown.
+
+Git is initialized. Inspect status/diff and preserve unrelated work. The current executable is still mdview; consult the project-name notes before changing identifiers.
 
 Read IMPLEMENTATION_PLAN.md, its latest session record, and any applicable repository instructions first. Inspect the existing code and working tree; preserve unrelated user changes.
 

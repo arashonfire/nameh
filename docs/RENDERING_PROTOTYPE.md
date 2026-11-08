@@ -1,4 +1,9 @@
-# Native Rendering Prototype Results
+# Nameh Native Rendering Prototype Results
+
+Nameh was developed and measured under the working name `mdview`. Historical
+commands, application IDs, screenshots and raw results below retain that name;
+the current executable and paths still use `mdview`. Git is now initialized at
+`5a3625d` (`first commit`), after the implementation and release-validation sessions.
 
 The application retains GTK's default renderer and the approved 180 MB RSS budget. Step 4 replaced direct parsing with the document model, and Step 5 connected file opening and safe navigation, and Step 6 added reading controls/preferences. Step 7 retained-memory acceptance is complete on the reference GNU/Linux desktop; transient peaks are reported explicitly. Earlier measurements below remain historical references.
 
@@ -97,7 +102,7 @@ Values are **MiB / decimal MB**, from `/proc/PID/status`, including remaining de
 
 Both runs pass all fixed idle checkpoints under the unchanged 180 MB budget. There were no child processes at any final-run checkpoint and both quit with status 0. Raw evidence: [prose](step7-memory-prose.jsonl), [fenced code](step7-memory-code.jsonl). Observed main-process reload peaks were **180.91 / 180.45 MB**; large-use peaks were **223.39 / 228.80 MB**. Largest sampling gaps were 15.16 / 16.08 ms. The fast sampler targets 10 ms and samples the main process; checkpoint totals recursively include children from all worker threads. These are observed peaks, not exhaustive process-tree maxima. The 5 MB target is responsiveness, not typical-document RSS. Normal picker headroom is narrow (179.85 MB in the code run); repeat picker and zoom/resize RSS profiling during Step 9.
 
-Reproduce with no existing mdview instance, keeping it focused and its geometry stable:
+Reproduce with no existing Nameh instance, keeping it focused and its geometry stable:
 
 ```sh
 export CARGO_HOME="$PWD/.cargo-home"
@@ -175,7 +180,7 @@ No new full screen reader, pointer-drag selection, or picker checks were perform
 
 ## Step 2 historical setup
 
-Close any existing mdview instance before switching modes. From the project directory:
+Close any existing Nameh instance before switching modes. From the project directory:
 
 ```sh
 export CARGO_HOME="$PWD/.cargo-home"
@@ -261,4 +266,4 @@ cargo build --release --locked --offline
 python scripts/measure_prototype.py
 ```
 
-Close existing mdview instances first. Step 9 must measure cold launch, a 100 KB document, and the final renderer on the documented reference machine. Step 7 responsiveness and completed memory-acceptance results are recorded above.
+Close existing Nameh instances first. Step 9 must measure cold launch, a 100 KB document, and the final renderer on the documented reference machine. Step 7 responsiveness and completed memory-acceptance results are recorded above.

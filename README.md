@@ -1,10 +1,20 @@
-# mdview
+# Nameh
 
-A lightweight native Markdown viewer for Linux, built with Rust, GTK4, and pulldown-cmark.
+Nameh is a lightweight native Markdown viewer for Linux, built with Rust, GTK4, and pulldown-cmark.
+
+The app was developed under the working name `mdview`. The executable/Cargo package
+is currently still `mdview`, the application ID is `io.github.arash.mdview`, and
+preferences and installed asset paths still use that identifier. Commands below
+match the current implementation; the Nameh name is now used in the documentation.
 
 ## Current status
 
 Steps 1–9 are complete, including accessibility, desktop integration, automatic reload, cooperative large-document loading/search, release validation and native installation tooling. The unchanged 180 MB idle RSS budget passes on the reference GNU/Linux desktop. Open files through the picker, drag and drop, or `mdview PATH`. See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) for the latest session record and [release validation](docs/RELEASE_VALIDATION.md) for results and unperformed checks. The user selected the [MIT license](LICENSE) and accepted the measured fresh-process startup results with OS caches warm/uncontrolled. No release has been published or persistently installed by the checks.
+
+The project now has a Git repository, initialized by the user with commit
+`5a3625d` (`first commit`). Earlier session records describe the environment before
+Git was initialized. Use `git status`, `git diff`, and the available history when
+reviewing subsequent changes.
 
 ## Prerequisites
 
@@ -69,7 +79,8 @@ portable bundle or proof of compatibility with every GTK 4.10 distribution.
 
 Installed files are the binary, desktop entry, scalable icon, MIME declaration,
 README, [user guide](docs/USER_GUIDE.md), and MIT license. Cache tools run when
-available; no default application is selected. Choose mdview through your file
+available; no default application is selected. The current desktop entry appears
+as **mdview**; choose it through your file
 manager's **Open With** controls if desired.
 
 Remove the installation with the same prefix:
@@ -78,7 +89,7 @@ Remove the installation with the same prefix:
 make uninstall PREFIX="$HOME/.local"
 ```
 
-Uninstall removes only mdview's installed files and refreshes available caches.
+Uninstall removes only Nameh's installed files and refreshes available caches.
 Documents, preferences, other applications and MIME default selections are
 preserved. Empty directories may remain. Preferences can be removed separately
 from the path documented under Reading controls.
@@ -96,7 +107,7 @@ installation/removal on the destination system. `CARGO_FLAGS` defaults to
 not yet been fetched. No archive, registry publication or system installation is
 performed by the release checks.
 
-To view the bundled rendering prototype, close existing mdview windows and run:
+To view the bundled rendering prototype, close existing Nameh windows and run:
 
 ```sh
 cargo run --locked --offline -- --prototype
@@ -148,7 +159,7 @@ python scripts/check_desktop.py
 python scripts/check_accessibility.py
 ```
 
-The desktop check exercises the Makefile's actual install/uninstall in a temporary prefix, builds temporary desktop/MIME caches, exercises launcher and file-manager launch APIs on Wayland and X11, checks Unicode/multi-file forwarding, compares existing default associations and preserves an unrelated file during removal. It needs Hyprland, `make`, `gtk4-launch`, `gio`, `gdbus`, `xdg-mime`, `desktop-file-validate`, `update-desktop-database` and `update-mime-database`. The accessibility check needs PyGObject's Atspi binding, `at-spi2-registryd`, `dbus-daemon` and `wtype`; it creates its own accessibility bus and stops key input if mdview loses focus. Close existing mdview instances before either check. MIME defaults are always a user choice; no script calls `xdg-mime default`.
+The desktop check exercises the Makefile's actual install/uninstall in a temporary prefix, builds temporary desktop/MIME caches, exercises launcher and file-manager launch APIs on Wayland and X11, checks Unicode/multi-file forwarding, compares existing default associations and preserves an unrelated file during removal. It needs Hyprland, `make`, `gtk4-launch`, `gio`, `gdbus`, `xdg-mime`, `desktop-file-validate`, `update-desktop-database` and `update-mime-database`. The accessibility check needs PyGObject's Atspi binding, `at-spi2-registryd`, `dbus-daemon` and `wtype`; it creates its own accessibility bus and stops key input if Nameh loses focus. Close existing Nameh instances before either check. MIME defaults are always a user choice; no script calls `xdg-mime default`.
 
 All reading controls support keyboard access. Native focus and caret styling are retained. Search counts and notices expose status roles with changing text; icon controls have accessible names. Tables expose aligned selectable text, rather than semantic row/cell navigation. Document text follows live system font changes as well as app zoom. GTK HighContrast/HighContrastInverse takes precedence over a saved Light/Dark choice; leaving high contrast restores that choice. Search's active text uses opaque selection colours and a double underline. Search and notice revealers have no animation. See the report for measured contrast, visual evidence and assistive-technology limits.
 
@@ -201,7 +212,7 @@ Step 6 adds preference default/validation/restart coverage and extends the GTK r
 
 Step 7 adds real GIO ordinary/atomic/burst-save, deletion/rename/recreation, invalid UTF-8/Retry, symlink/parent-path, viewport, monitor cancellation and large-view/buffer release checks. Five-megabyte prose/search and code tests observed maximum main-loop gaps of 16.48 ms and 17.96 ms, below the 250 ms regression ceiling. Streaming Unicode matching preserves expansion offsets and full counts without a document-sized offset map. Image tests cover valid PNG/JPEG/GIF/BMP/PNM, alpha, scaling, security limits and skipping retired queued jobs.
 
-Final release runs at 1520 × 956, with GTK's default renderer and complete checkpoint child accounting, returned from 5 MB prose/code to a small file after 20 seconds at **163.38 / 171.31** and **167.98 / 176.14** (MiB / MB), below the unchanged 180 MB budget. Normal and final picker checks also pass, with no children at any checkpoint. The [rendering report](docs/RENDERING_PROTOTYPE.md) records raw results, driver transients, the glibc reclamation decision, the raster decoder change, timing and remaining limits. Reproduce with `python scripts/measure_reload.py` and `python scripts/measure_reload.py --large-kind code`; `--output NEW_PATH` saves JSON lines. Allow about two minutes each, keep mdview focused and use stable compositor geometry.
+Final release runs at 1520 × 956, with GTK's default renderer and complete checkpoint child accounting, returned from 5 MB prose/code to a small file after 20 seconds at **163.38 / 171.31** and **167.98 / 176.14** (MiB / MB), below the unchanged 180 MB budget. Normal and final picker checks also pass, with no children at any checkpoint. The [rendering report](docs/RENDERING_PROTOTYPE.md) records raw results, driver transients, the glibc reclamation decision, the raster decoder change, timing and remaining limits. Reproduce with `python scripts/measure_reload.py` and `python scripts/measure_reload.py --large-kind code`; `--output NEW_PATH` saves JSON lines. Allow about two minutes each, keep Nameh focused and use stable compositor geometry.
 
 Run the full suite on a graphical desktop with session-bus access:
 
