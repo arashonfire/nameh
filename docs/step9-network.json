@@ -1,0 +1,8 @@
+{
+  "release_sha256": "78a674f87e5d886c44e62b123528767901ccd19a204f346faa002637719c8877",
+  "tracer_controls_pass": true,
+  "trace_exit": 0,
+  "source_unchanged": true,
+  "trace": "/home/arash/Documents/markdown/docs/step9-network.log",
+  "scope": "mdview and traced descendants, Linux x86-64; Unix IPC allowed; no external activation"
+}

@@ -1,0 +1,15 @@
+{"initial": {"bytes": 175804416, "parent_bytes": 175804416, "mib": 167.66, "mb": 175.8, "children": []}, "initial_geometry": [[1520, 956]], "release_sha256": "1daf569a390d53d861b704c8aa654b2b30c05853d1332912b5aaec4dc9d41d9b"}
+{"after_30_reloads": {"bytes": 168673280, "parent_bytes": 168673280, "mib": 160.86, "mb": 168.67, "children": []}, "coarse_sampled_peak_mb": 180.4, "reload_sampled_peak_mb": 180.45, "last_10_range_mb": [168.61, 180.4]}
+{"reload_idle_after_20_seconds": {"bytes": 167632896, "parent_bytes": 167632896, "mib": 159.87, "mb": 167.63, "children": []}}
+{"picker_geometry": [[720, 480]]}
+{"normal_post_picker_cancel": {"bytes": 179810304, "parent_bytes": 179810304, "mib": 171.48, "mb": 179.81, "children": []}, "geometry": [[1520, 956]]}
+{"normal_picker_idle_after_31_seconds": {"bytes": 179847168, "parent_bytes": 179847168, "mib": 171.52, "mb": 179.85, "children": []}}
+{"large_kind": "code", "large_bytes": 5000104}
+{"large_document_search_rss": {"bytes": 228798464, "parent_bytes": 228798464, "mib": 218.2, "mb": 228.8, "children": []}}
+{"large_title": "large.md \u2014 mdview"}
+{"small_titles": ["Unicode caf\u00e9.md \u2014 mdview"], "returned_to_small": {"bytes": 176140288, "parent_bytes": 176140288, "mib": 167.98, "mb": 176.14, "children": []}}
+{"small_after_20_seconds": {"bytes": 176140288, "parent_bytes": 176140288, "mib": 167.98, "mb": 176.14, "children": []}}
+{"picker_geometry": [[720, 480]]}
+{"post_picker_cancel": {"bytes": 173850624, "parent_bytes": 173850624, "mib": 165.8, "mb": 173.85, "children": []}}
+{"final_picker_idle_after_31_seconds": {"bytes": 174714880, "parent_bytes": 174714880, "mib": 166.62, "mb": 174.71, "children": []}, "stress_sampled_peak_mb": 228.8, "rss_budget_mb": 180, "idle_budget_pass": true, "final_geometry": [[1520, 956]], "geometry_stable": true, "sample_count": 11673, "largest_sample_gap_ms": 16.08}
+{"exit": 0}

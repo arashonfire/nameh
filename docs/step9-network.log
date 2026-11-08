@@ -1,0 +1,17 @@
+socket pid=3402282 family=1
+destination pid=3402282 family=1
+socket pid=3402282 family=1
+destination pid=3402282 family=1
+socket pid=3402282 family=1
+destination pid=3402282 family=1
+socket pid=3402282 family=1
+destination pid=3402282 family=1
+socket pid=3402282 family=1
+destination pid=3402282 family=1
+socket pid=3402282 family=1
+destination pid=3402282 family=1
+socket pid=3402282 family=1
+destination pid=3402282 family=1
+socket pid=3402282 family=1
+destination pid=3402282 family=1
+root_exit=0 forbidden_or_uninspected=0

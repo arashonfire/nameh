@@ -1,0 +1,254 @@
+{
+  "atspi_tree": [
+    {
+      "role": "application",
+      "name": "mdview",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "frame",
+      "name": "rendering.md — mdview",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "panel",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "grouping",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "grouping",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "panel",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "scroll pane",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "text",
+      "name": "Markdown document",
+      "text": "Rendering Prototype\n\nSelect this paragraph and continue through the table to check copying across blocks.\n\n\n\n\n\n\n\nLong code\n\n\n\n ·  · \n\nUnicode\n\nCafé — Ελληνικά — فارسی — 日本語 — 🐧\n\nDuplicate\n\nFirst heading with this name.\n\nDuplicate\n\nSecond heading with this name, for deterministic duplicate anchor handling.\n\n",
+      "focused": true
+    },
+    {
+      "role": "scroll pane",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "text",
+      "name": "Markdown table",
+      "text": "Name  |   Description   | Count\nAlpha | Bold and italic |    12\nBeta  |   inline code   |   300",
+      "focused": false
+    },
+    {
+      "role": "panel",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "image",
+      "name": "A small colored square",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "panel",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "label",
+      "name": "[Image unavailable: Missing local image — No such file or directory (os error 2)]",
+      "text": "[Image unavailable: Missing local image — No such file or directory (os error 2)]",
+      "focused": false
+    },
+    {
+      "role": "scroll pane",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "text",
+      "name": "Code block: text",
+      "text": "    Indentation and spaces must be preserved.\nThis deliberately long code line should scroll horizontally inside its own block without making the entire document wider than the window: alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu nu xi omicron pi rho sigma tau upsilon phi chi psi omega.\n",
+      "focused": false
+    },
+    {
+      "role": "scroll bar",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "panel",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "link",
+      "name": "Basic fixture",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "label",
+      "name": "Basic fixture",
+      "text": "Basic fixture",
+      "focused": false
+    },
+    {
+      "role": "link",
+      "name": "Unicode path",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "label",
+      "name": "Unicode path",
+      "text": "Unicode path",
+      "focused": false
+    },
+    {
+      "role": "link",
+      "name": "Long code",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "label",
+      "name": "Long code",
+      "text": "Long code",
+      "focused": false
+    },
+    {
+      "role": "scroll bar",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "panel",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "grouping",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "panel",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "panel",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "panel",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Open a Markdown file",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Find in document",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "label",
+      "name": "rendering.md — mdview",
+      "text": "rendering.md — mdview",
+      "focused": false
+    },
+    {
+      "role": "panel",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "label",
+      "name": "100%",
+      "text": "100%",
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Reading preferences",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "toggle button",
+      "name": "Reading preferences",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "panel",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Open a new window",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "grouping",
+      "name": "",
+      "text": "",
+      "focused": false
+    },
+    {
+      "role": "button",
+      "name": "Close",
+      "text": "",
+      "focused": false
+    }
+  ],
+  "keyboard_heading_activation": true,
+  "unicode_table_code_image_links": true,
+  "real_keys_find_next_escape_picker_zoom": true,
+  "speech_reader": "unavailable; Orca is not installed"
+}

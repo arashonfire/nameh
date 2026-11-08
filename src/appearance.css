@@ -1,0 +1,26 @@
+/* App overrides use GTK's built-in palette roles, never document CSS. */
+@define-color accent_color @theme_selected_bg_color;
+@define-color accent_bg_color @theme_selected_bg_color;
+@define-color accent_fg_color @theme_selected_fg_color;
+@define-color window_bg_color @theme_bg_color;
+@define-color window_fg_color @theme_fg_color;
+@define-color headerbar_bg_color @theme_bg_color;
+@define-color headerbar_fg_color @theme_fg_color;
+@define-color popover_bg_color @theme_bg_color;
+@define-color popover_fg_color @theme_fg_color;
+@define-color view_bg_color @theme_base_color;
+@define-color view_fg_color @theme_text_color;
+@define-color card_bg_color @theme_base_color;
+@define-color card_fg_color @theme_text_color;
+@define-color sidebar_bg_color @theme_bg_color;
+@define-color sidebar_fg_color @theme_fg_color;
+@define-color sidebar_border_color @borders;
+@define-color sidebar_backdrop_color @theme_bg_color;
+window.mdview-window { background-color: @window_bg_color; color: @window_fg_color; }
+window.mdview-window headerbar,
+window.mdview-window headerbar label,
+window.mdview-window #mdview-searchbar,
+window.mdview-window #mdview-searchbar label { color: @window_fg_color; }
+window.mdview-window textview,
+window.mdview-window textview text,
+window.mdview-window entry { background-color: @view_bg_color; color: @view_fg_color; }

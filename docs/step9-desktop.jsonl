@@ -1,0 +1,5 @@
+{"desktop_valid": true, "original_defaults": {"text/markdown": "org.kde.kate.desktop", "text/x-markdown": ""}}
+{"backend": "wayland", "titles": ["basic.md \u2014 mdview", "Unicode caf\u00e9.md \u2014 mdview"], "launcher_and_file_open": true}
+{"backend": "x11", "titles": ["basic.md \u2014 mdview", "Unicode caf\u00e9.md \u2014 mdview"], "launcher_and_file_open": true}
+{"make_install_uninstall": true, "unrelated_file_preserved": true}
+{"defaults_unchanged": true, "temporary_install_removed": true}

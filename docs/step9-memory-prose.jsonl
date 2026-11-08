@@ -1,0 +1,15 @@
+{"initial": {"bytes": 175448064, "parent_bytes": 175448064, "mib": 167.32, "mb": 175.45, "children": []}, "initial_geometry": [[1520, 956]], "release_sha256": "78a674f87e5d886c44e62b123528767901ccd19a204f346faa002637719c8877"}
+{"after_30_reloads": {"bytes": 168292352, "parent_bytes": 168292352, "mib": 160.5, "mb": 168.29, "children": []}, "coarse_sampled_peak_mb": 180.05, "reload_sampled_peak_mb": 180.07, "last_10_range_mb": [168.22, 180.05]}
+{"reload_idle_after_20_seconds": {"bytes": 166350848, "parent_bytes": 166350848, "mib": 158.64, "mb": 166.35, "children": []}}
+{"picker_geometry": [[720, 480]]}
+{"normal_post_picker_cancel": {"bytes": 178712576, "parent_bytes": 178712576, "mib": 170.43, "mb": 178.71, "children": []}, "geometry": [[1520, 956]]}
+{"normal_picker_idle_after_31_seconds": {"bytes": 178712576, "parent_bytes": 178712576, "mib": 170.43, "mb": 178.71, "children": []}}
+{"large_kind": "prose", "large_bytes": 5000082}
+{"large_document_search_rss": {"bytes": 196239360, "parent_bytes": 196239360, "mib": 187.15, "mb": 196.24, "children": []}}
+{"large_title": "large.md \u2014 mdview"}
+{"small_titles": ["Unicode caf\u00e9.md \u2014 mdview"], "returned_to_small": {"bytes": 169926656, "parent_bytes": 169926656, "mib": 162.05, "mb": 169.93, "children": []}}
+{"small_after_20_seconds": {"bytes": 169926656, "parent_bytes": 169926656, "mib": 162.05, "mb": 169.93, "children": []}}
+{"picker_geometry": [[720, 480]]}
+{"post_picker_cancel": {"bytes": 166236160, "parent_bytes": 166236160, "mib": 158.54, "mb": 166.24, "children": []}}
+{"final_picker_idle_after_31_seconds": {"bytes": 166236160, "parent_bytes": 166236160, "mib": 158.54, "mb": 166.24, "children": []}, "stress_sampled_peak_mb": 226.59, "rss_budget_mb": 180, "idle_budget_pass": true, "final_geometry": [[1520, 956]], "geometry_stable": true, "sample_count": 11620, "largest_sample_gap_ms": 14.17}
+{"exit": 0}
